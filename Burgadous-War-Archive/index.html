@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Fall of Sect J — 5th Great Cycle | Burgadous War Archive</title>
+  <meta name="description" content="Declassified one-page archive on the Fall of Sect J and the capture of Burgadous Ladous Nadous. Swords, shields, betrayal, and field tactics.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* --- Old paper dossier aesthetic --- */
+    :root {
+      --ink: #1e1b16;
+      --ink-weak: #2d271f;
+      --accent: #7a0a0a;
+      --accent-dim: #5e0a0a;
+      --paper: #ece3cf;
+      --paper-edge: #e2d7bc;
+      --paper-dark: #d7cdb6;
+      --shadow: rgba(0, 0, 0, .15);
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(0, 0, 0, .06), transparent 60%),
+        radial-gradient(900px 600px at 90% 0%, rgba(0, 0, 0, .05), transparent 60%),
+        linear-gradient(180deg, #f3ecd9 0%, #e8dcc2 100%);
+      font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
+      letter-spacing: .2px;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 38px 38px 60px;
+      background:
+        linear-gradient(transparent 31px, var(--paper-edge) 32px) top/100% 32px no-repeat,
+        radial-gradient(1200px 900px at 30% -20%, rgba(255, 255, 255, .45), transparent 60%),
+        radial-gradient(900px 700px at 100% 0%, rgba(255, 255, 255, .3), transparent 60%), var(--paper);
+      box-shadow: 0 30px 60px var(--shadow), 0 2px 0 var(--paper-dark) inset;
+      border: 1px solid #d0c7af;
+      position: relative;
+      overflow: clip;
+      border-radius: 8px;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .page.show {
+      opacity: 1;
+    }
+
+    .loading-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: #f3ecd9;
+      color: var(--ink-weak);
+      font-family: 'IBM Plex Mono', 'Courier New', Courier, monospace;
+      font-size: 1.25rem;
+      text-align: center;
+      padding: 2rem;
+      opacity: 1;
+      transition: opacity 1s ease-in-out;
+      z-index: 100;
+    }
+
+    .loading-screen.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #8f846e;
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 2rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes flicker {
+      0%, 19.99% { opacity: 1; }
+      20%, 20.99% { opacity: 0; }
+      21%, 21.99% { opacity: 1; }
+      22%, 24.99% { opacity: 0; }
+      25%, 39.99% { opacity: 1; }
+      40%, 40.99% { opacity: 0; }
+      41%, 44.99% { opacity: 1; }
+      45%, 45.99% { opacity: 0; }
+      46%, 100% { opacity: 1; }
+    }
+
+    #loading-text {
+        animation: flicker 1s infinite;
+    }
+
+    .stamp {
+      position: absolute;
+      right: -18px;
+      top: 40px;
+      transform: rotate(-12deg);
+      border: 2px solid var(--accent-dim);
+      color: var(--accent-dim);
+      padding: 8px 14px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      filter: drop-shadow(0 6px 6px rgba(0, 0, 0, .15));
+      background: #f7efe0;
+      border-radius: 4px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 28px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      -webkit-mask-image: linear-gradient(-75deg, rgba(0,0,0,.6) 30%, #000 50%, rgba(0,0,0,.6) 70%);
+      -webkit-mask-size: 200%;
+      animation: shine 2s linear infinite;
+    }
+    
+    @keyframes shine {
+      from { -webkit-mask-position: 150%; }
+      to { -webkit-mask-position: -50%; }
+    }
+
+    .seal {
+      width: 64px;
+      height: 64px;
+      border: 2px solid var(--accent-dim);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: var(--accent-dim);
+      box-shadow: 0 0 0 3px rgba(122, 10, 10, .12) inset;
+    }
+
+    .seal span {
+      font-size: 11px;
+      line-height: 1.1;
+      text-align: center;
+      letter-spacing: 1.3px
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase
+    }
+
+    .title small {
+      display: block;
+      color: #5a5140;
+      margin-top: 4px
+    }
+
+    .ribbon {
+      margin: 16px 0 22px;
+      padding: 10px 14px;
+      border: 1px dashed var(--accent);
+      background: repeating-linear-gradient(-45deg, #f5e9d2, #f5e9d2 8px, #f1e3c9 8px, #f1e3c9 16px);
+      color: var(--accent-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 1px;
+      border-radius: 4px;
+    }
+
+    .ribbon .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent)
+    }
+
+    nav {
+      margin: 14px 0 22px;
+      font-size: 13px;
+      border-top: 1px solid #cebfa0;
+      border-bottom: 1px solid #cebfa0;
+      padding: 10px 0;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--ink-weak);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--ink-weak)
+    }
+
+    nav a:hover {
+      color: var(--accent);
+      border-color: var(--accent)
+    }
+
+    h2 {
+      font-size: 18px;
+      margin: 26px 0 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px
+    }
+
+    h3 {
+      font-size: 15px;
+      margin: 18px 0 8px;
+      letter-spacing: .6px
+    }
+
+    p {
+      line-height: 1.6;
+      margin: 8px 0
+    }
+
+    ul {
+      margin: 8px 0 8px 18px
+    }
+
+    .muted {
+      color: #6b614d
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border: 1px solid #b6a689;
+      margin-left: 6px
+    }
+
+    .callout {
+      border: 1px solid #cdbf9f;
+      padding: 12px 14px;
+      background: #f6ecd6;
+      margin: 12px 0;
+      border-radius: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px
+    }
+
+    @media (max-width: 920px) {
+      .grid, .grid-3 {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .idcard {
+      border: 1px solid #cdbf9f;
+      padding: 10px 12px;
+      background: #efe4ca;
+      border-radius: 4px;
+    }
+
+    .idcard b {
+      display: block;
+      font-size: 14px
+    }
+
+    .log {
+      background: #111;
+      color: #d0d0d0;
+      border: 1px solid #000;
+      padding: 12px;
+      font-size: 13px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, .25) inset;
+      border-radius: 4px;
+    }
+
+    .log .green {
+      color: #7fd77f
+    }
+
+    .log .red {
+      color: #ff7b70
+    }
+
+    .log .amber {
+      color: #e0c46b
+    }
+
+    .timeline {
+      border-left: 3px solid #a38f68;
+      margin: 10px 0 10px 6px;
+      padding-left: 14px
+    }
+
+    .timeline .t {
+      margin: 12px 0
+    }
+
+    .timeline .t b {
+      display: inline-block;
+      width: 150px
+    }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 12px;
+      border-top: 1px solid #cdbf9f;
+      font-size: 12px;
+      color: #6b614d
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: .1
+      }
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      background: #d0d0d0;
+      animation: blink .9s step-end infinite
+    }
+    
+    .interactive {
+        cursor: pointer;
+        font-weight: bold;
+        color: var(--accent);
+        text-decoration: underline;
+        text-decoration-color: rgba(122, 10, 10, 0.4);
+        text-underline-offset: 4px;
+        transition: color 0.2s ease-in-out;
+    }
+
+    .interactive:hover {
+        color: var(--ink-weak);
+        text-decoration-color: rgba(45, 39, 31, 0.4);
+    }
+    
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease-in-out;
+        z-index: 1000;
+    }
+    
+    .modal.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .modal-content {
+        background-color: var(--paper);
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        transform: scale(0.9);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .modal.show .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-close {
+        float: right;
+        font-size: 1.5rem;
+        cursor: pointer;
+        line-height: 1;
+        color: var(--ink);
+    }
+  </style>
+</head>
+<body class="bg-[#f3ecd9] font-[IBM_Plex_Mono]">
+
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-spinner"></div>
+    <p id="loading-text"></p>
+  </div>
+  
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close">&times;</span>
+      <h3 id="modal-title" class="text-base tracking-wide font-bold mt-0 mb-2"></h3>
+      <p id="modal-body" class="leading-relaxed my-2"></p>
+    </div>
+  </div>
+
+  <main id="main-content" class="page rounded-lg" role="document">
+    <div class="stamp" aria-label="Declassified">
+      DECLASSIFIED
+    </div>
+    <header>
+      <div class="seal" aria-hidden="true">
+        <span>BURGADOUS<br>
+        WAR<br>
+        ARCHIVE</span>
+      </div>
+      <div class="title">
+        <h1 class="text-2xl tracking-wide uppercase font-bold">THE FALL OF SECT J — YEAR OF THE OBSIDIAN THRONE</h1>
+        <small class="block text-sm text-[#5a5140] mt-1">Case: BJ/241-WAR • Field Campaign Dossier • Public Edition</small>
+      </div>
+    </header>
+    <div class="ribbon">
+      OFFICIAL SUMMARY — PUBLIC RELEASE COPY
+    </div>
+    <nav aria-label="Sections">
+      <a href="#summary" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Summary</a>
+      <a href="#cast" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Cast</a>
+      <a href="#timeline" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Timeline</a>
+      <a href="#evidence" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Evidence</a>
+      <a href="#analysis" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Analysis</a>
+      <a href="#aftermath" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Aftermath</a>
+      <a href="#myths" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">Urban Myths</a>
+      <a href="#faq" class="text-[#2d271f] hover:text-[#7a0a0a] border-b border-dotted border-[#2d271f] hover:border-[#7a0a0a]">FAQ</a>
+    </nav>
+
+    <section id="summary">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">Executive Summary <span class="badge">Notice BJ-431</span></h2>
+      <p class="leading-relaxed my-2">On <b>First Light, Sunfall 14 of the Verdant Month, Year 241 of the Obsidian Throne</b>, Sect J fielded roughly 4,000 infantry and light cavalry against a Burgadous Alliance force twice its size. For ten sunfalls, steel met steel on the eastern plain. The turning point arrived when <span class="interactive" data-info-title="The Traitor of Arkh" data-info-body="Commander Telrik was an esteemed logistics officer from a long line of quartermasters. His defection shocked the troops and turned the tide of the war, though his motives remain debated. Some say he acted out of self-preservation, while others claim he sought to end the suffering of the civilians within the city walls.">Commander Telrik</span>—Sect J’s logistics chief—defected and exposed the supply routes. With depots burned and wells seized, Burgadous Ladous Nadous fell after an **eleven-day siege**. The sect’s authority collapsed.</p>
+      <div class="callout rounded-md">
+        <b>Finding:</b> The defeat was driven by logistics failure and political betrayal, not sorcery or machines. Pikes, shields, terrain, and timing decided the day. The weight of an army is measured in its stomach, not its swords.
+      </div>
+    </section>
+
+    <section id="cast">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">The Cast</h2>
+      <div class="grid-3">
+        <div class="idcard rounded-md">
+          <b class="block text-base">General Corveth</b>Field commander of Sect J, led the wedge assault on Day 10.<br>
+          <i>Status:</i> KIA at the East Ditch.
+        </div>
+        <div class="idcard rounded-md">
+          <b class="block text-base">Commander Telrik</b>Logistics officer; defected on Day 8 and revealed grain caches and mule roads.<br>
+          <i>Status:</i> Pardoned by the Alliance; seated on the Burgadous council.
+        </div>
+        <div class="idcard rounded-md">
+          <b class="block text-base">Captain Renna</b>Held the southern bank with 300 infantry to cover the retreat.<br>
+          <i>Status:</i> Survived; whereabouts unknown.
+        </div>
+      </div>
+      <div class="grid mt-3">
+        <div class="idcard rounded-md">
+          <b class="block text-base">Gate Warden Marek</b>Alliance officer who ordered the inner gates unbarred at dusk of Day 11.<br>
+          <i>Motto:</i> “Open once. Never again.”
+        </div>
+        <div class="idcard rounded-md">
+          <b class="block text-base">Citizens of Burgadous</b>Non-combatants caught between walls and siege lines; suffered shortages.<br>
+          <i>Condition:</i> Markets restored within 30 days; grief lingered longer.
+        </div>
+      </div>
+    </section>
+
+    <section id="timeline">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">Incident Timeline</h2>
+      <div class="timeline">
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 1–3</b> Sect J advances; Alliance pushed back 7 li from the walls.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: Field skirmishes favor Sect J, but the rain-slicked fields make movement slow and treacherous. The men chant as they march, but the sound is swallowed by the endless downpour. Mud clings to their boots, heavy and cold, a constant reminder of the difficult path ahead.</p>
+        </div>
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 4–6</b> Heavy rain ruins powder; fighting shifts to spears, bows, and shields.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: Soldiers are exhausted, their bronze swords brittle from repeated clashes. The mud is thick, making the simple act of lifting a shield a chore. Whispers of desertion begin to spread through the ranks, fueled by hunger and despair.</p>
+        </div>
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 7</b> Night raid succeeds; Sect J captures outer granary but cannot hold it.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: The brief taste of victory is hollow; grain is a fleeting luxury, and the true prize remains behind the walls. We fight with the ghosts of a full stomach, a cruel phantom of a meal we will never have.</p>
+        </div>
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 8</b> Telrik defects; mule road and depots torched; water points seized.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: The smoke from the North Road depot can be seen from the city walls. This is the moment morale collapses. The men are not just hungry, they are betrayed. Their trust in Telrik, a man who shared their rations, turns to bitter ash.</p>
+        </div>
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 9</b> Final message from Telrik received, offering terms. General Corveth refuses.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: The message from Telrik is a polished piece of parchment, a stark contrast to our torn and muddy gear. Corveth's refusal is met with a weary silence. The men know they are being led to their deaths, but their loyalty holds firm, a final act of defiance.</p>
+        </div>
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 10</b> Corveth orders wedge assault at the East Ditch; half the force lost.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: The final charge is a desperate, bloody gamble. The ditch becomes a killing ground, filled with broken pikes and the cries of the starving. Corveth dies with his face to the sky, a hero to some, a fool to many.</p>
+        </div>
+        <div class="t my-3">
+          <b class="inline-block w-[150px]">Sunfall 11</b> Inner gates opened at dusk; brief street combat; Sect J surrenders.
+          <p class="italic text-sm text-[#6b614d] my-1">Notes: The final hours are a blur of surrender and exhaustion. The citizens mourn their dead, and the soldiers of Sect J lay down their arms, no longer fighters, just men.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">Evidence & Exhibits</h2>
+      <div class="grid">
+        <div>
+          <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Exhibit A — Field Log (fragment)</h3>
+          <div class="log rounded-md" role="log" aria-live="polite">
+            03:02 D1 unit=Vanguard spear_wall <span class="green">ADVANCE_HELD</span><br>
+            19:44 D3 scout=SouthBank <span class="amber">RAIN_INTENSIFIES</span><br>
+            02:11 D7 raid=Granary_East <span class="green">STORE_TAKEN</span> rations+2d<br>
+            04:09 D8 officer=<span class="interactive" data-info-title="The Traitor" data-info-body="Telrik was known for his meticulous maps and encyclopedic knowledge of the region's hidden paths and resources. His betrayal was not a simple act of turning, but a precise and devastating surgical strike against Sect J's entire logistical network.">Telrik</span> <span class="red">SUPPLY_BREACH</span> depot=NorthRoad<br>
+            12:31 D8 well=Kestrel <span class="red">WATER_LOST</span><br>
+            15:07 D10 formation=WEDGE <span class="amber">BREAKTHROUGH_ATTEMPT</span><br>
+            17:52 D10 casualties <span class="red">HALF_STRENGTH</span><br>
+            18:23 D11 gate=InnerWest <span class="red">GATE_OPEN</span> street_fight=brief<br>
+            19:10 D11 banner=SectJ <span class="red">STANDARD_LOWERED</span><br>
+            <span class="muted">_note: “Steel decided; hunger agreed.”</span><span class="cursor">&nbsp;</span>
+          </div>
+          <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Exhibit C — Battlefield Relics</h3>
+          <ul>
+            <li>Broken sword of <span class="interactive" data-info-title="The Last General" data-info-body="General Corveth was a veteran commander, known for his relentless and often reckless pursuit of victory. His final charge at the East Ditch was seen as a desperate, final act of a man who refused to admit defeat.">General Corveth</span>, recovered at the East Ditch. Its hilt is engraved with a single raven, the symbol of his lineage.</li>
+            <li>Charred seal of the <span class="interactive" data-info-title="Site of Betrayal" data-info-body="The North Road Depot was a key logistical hub, holding enough grain and water to sustain the army for weeks. Its destruction marked the end of any hope for a protracted siege.">North Road Depot</span>, bearing Telrik’s mark. The symbol of a single grain is singed, a grim irony.</li>
+            <li>Hand-stitched Sect J standard, stained with mud and rain. The fabric smells of damp earth and regret.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Exhibit B — Council Orders</h3>
+          <div class="callout rounded-md">
+            <b>Order:</b> Effective immediately, admit Alliance quartermasters; disarm Sect J within the walls; protect civilians.<br>
+            <b>Remark:</b> “No victory without grain. No peace without water.” — Gate Warden Marek
+          </div>
+          <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Exhibit D — Soldier's Journal (Fragment)</h3>
+          <div class="log rounded-md" role="log" aria-live="polite">
+            <span class="muted">The Third Moonrise, 9th Sunfall of the Verdant Month.</span><br>
+            We received half rations today. It’s not the fighting that kills you; it’s the thirst. We chew on dried roots. We dream of water. There are whispers of a supply breach, but our Captain says it’s a lie. But we can all smell the smoke from here, can't we? It smells like failure.<span class="cursor">&nbsp;</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="analysis">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">Analysis — Why Sect J Lost</h2>
+      <div class="grid">
+        <div>
+          <p class="leading-relaxed my-2"><b>Logistics:</b> With depots burned and wells seized on Sunfall 8, Sect J lost endurance. Short rations crippled the night watch and the reserve lines before the decisive assault. The hunger was a weapon more effective than any blade.</p>
+          <p class="leading-relaxed my-2"><b>Formation Risk:</b> The Sunfall 10 wedge attack created momentum but overexposed the flanks. Once the tip stalled at the ditch, the formation became a killing ground. The bronze swords were no match for the Alliance's iron-tipped spears, and the mud turned a tactical mistake into a massacre.</p>
+        </div>
+        <div>
+          <div class="callout rounded-md">
+            <b>Doctrine: ARKH-5GC</b><br>
+            Guard supply lines with mixed companies; never concentrate command and logistics in one officer; rotate gate wardens at dusk.
+            <i>Status:</i> Adopted by Alliance garrisons.
+          </div>
+          <p class="muted leading-relaxed my-2"><b>Risk Markers:</b> empty wells near city lines; smoke columns at mule roads; units trading shields for speed.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="aftermath">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">Aftermath & Community Impact</h2>
+      <ul>
+        <li><b>Sect J:</b> Disbanded; remaining companies absorbed into Alliance militia. Their banner was burned in a public square, a final, shameful act.</li>
+        <li><b>Telrik:</b> Elevated to council; wrote grain-law favoring frontier towns. He is both a hero and a villain in popular folklore, a man who saved his people by betraying his cause.</li>
+        <li><b>Economy:</b> Markets reopened in 30 sunfalls; salt convoys rerouted via South Gate. The city still faces a labor shortage from the casualties of war.</li>
+        <li><b>Civilians:</b> Bell toll each Arkh-11 at dusk to honor the fallen. A ritual of remembrance where the people whisper the names of the dead into the wind, believing it carries their souls to the heavens.</li>
+      </ul>
+      <div class="callout rounded-md">
+        <b>Officer’s Note (Marek):</b> “Steel won the gate; bread kept it.”
+      </div>
+    </section>
+
+    <section id="myths">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">Urban Myths Still Circulating</h2>
+      <ul>
+        <li>At dusk on Arkh-11, the East Ditch “rings” if you set a broken sword on its bank.</li>
+        <li>The North Road still smells of wet grain after rain, no barns in sight.</li>
+        <li>A ledger somewhere lists Telrik under both “Savior” and “Traitor.”</li>
+      </ul>
+    </section>
+
+    <section id="faq">
+      <h2 class="text-lg uppercase tracking-wide font-bold mt-6 mb-2">FAQ</h2>
+      <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Was Commander Telrik solely responsible?</h3>
+      <p class="leading-relaxed my-2">No. His defection exposed the supply web, but weather and risky formations amplified the damage. The truth is, the army was already starving and on its last legs when he made his move.</p>
+      <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Why wasn’t a negotiated surrender accepted earlier?</h3>
+      <p class="leading-relaxed my-2">Sect J demanded control of the inner markets; the Alliance refused. Talks collapsed on Sunfall 6. General Corveth was a stubborn man, and his pride was a greater enemy than the Alliance's army.</p>
+      <h3 class="text-base tracking-wide font-bold mt-4 mb-2">What happened to Captain Renna's force?</h3>
+      <p class="leading-relaxed my-2">Captain Renna and her force successfully covered the retreat of the main army, but became separated from them in the process. With their numbers decimated, they were eventually absorbed into the local militia and scattered across the region. Rumor has it that Renna herself now lives as a hermit in the wilderness.</p>
+      <h3 class="text-base tracking-wide font-bold mt-4 mb-2">Are there any survivors of the battle?</h3>
+      <p class="leading-relaxed my-2">While most of Sect J’s soldiers were either killed or absorbed into the Alliance, many non-combatant survivors of the siege live on. Their accounts, passed down from generation to generation, remain a crucial part of the city's oral history.</p>
+    </section>
+
+    <footer>
+      <div class="mt-10 pt-3 border-t border-[#cdbf9f] text-xs text-[#6b614d]">
+        Burgadous War Archive • Record BJ/241-WAR • Prepared for public release • “Steel decides; grain sustains.”
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const loadingScreen = document.getElementById('loading-screen');
+      const loadingText = document.getElementById('loading-text');
+      const mainContent = document.getElementById('main-content');
+
+      const messages = [
+        "Loading files from the archives...",
+        "Searching for the original manuscript...",
+        "Analyzing historical records...",
+        "Cross-referencing data points...",
+        "Accessing confidential documents...",
+        "Verifying source authenticity...",
+        "Digitizing ancient scrolls...",
+        "Unlocking classified information...",
+        "Retrieving forgotten transcripts...",
+        "Compiling the final report..."
+      ];
+
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      loadingText.textContent = randomMessage;
+
+      setTimeout(() => {
+        loadingScreen.classList.add('hide');
+        mainContent.classList.add('show');
+      }, 7000);
+      
+      const modal = document.getElementById('modal');
+      const modalClose = document.querySelector('.modal-close');
+      const modalTitle = document.getElementById('modal-title');
+      const modalBody = document.getElementById('modal-body');
+      
+      document.querySelectorAll('.interactive').forEach(element => {
+          element.addEventListener('click', (event) => {
+              event.preventDefault();
+              modalTitle.textContent = element.dataset.infoTitle;
+              modalBody.textContent = element.dataset.infoBody;
+              modal.classList.add('show');
+          });
+      });
+      
+      modalClose.addEventListener('click', () => {
+          modal.classList.remove('show');
+      });
+      
+      modal.addEventListener('click', (event) => {
+          if (event.target === modal) {
+              modal.classList.remove('show');
+          }
+      });
+    });
+
+    // Tiny ambient flicker for the declass stamp and log cursor
+    (function() {
+      const stamp = document.querySelector('.stamp');
+      const cursors = document.querySelectorAll('.cursor');
+
+      function jitter() {
+        if (stamp) {
+          stamp.style.transform = `rotate(${ -12 + (Math.random() - .5) * .6 }deg)`;
+          stamp.style.opacity = 0.96 + Math.random() * 0.04;
+        }
+      }
+      setInterval(jitter, 900);
+
+      let on = true;
+      setInterval(() => {
+        cursors.forEach(c => c.style.opacity = on ? 1 : 0.08);
+        on = !on;
+      }, 450);
+    })();
+  </script>
+</body>
+</html>
+
