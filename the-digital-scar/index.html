@@ -19,6 +19,7 @@
         font-family: "IBM Plex Mono", "Courier New", Courier, monospace; letter-spacing:.2px;
         overflow-x: hidden;
       }
+      body.no-scroll { overflow: hidden; }
       .page{ max-width: 980px; margin: 40px auto; padding: 38px 38px 60px; background-color: var(--paper-edge);
         box-shadow: 0 30px 60px var(--shadow), 2px 0 0 var(--paper-dark) inset;
         position: relative; overflow: clip; border-radius: 8px; transform-style: preserve-3d; }
@@ -48,6 +49,17 @@
       .idcard b{display:block; font-size:14px; color: var(--accent)}
       .log{background:#0a0e16; color:#a9a9a9; border:1px solid #2a3648; padding:12px; font-size:13px; box-shadow:0 10px 20px rgba(0,0,0,.25) inset; border-radius: 4px;}
       .log .green{color:#7fd77f} .log .red{color:#ff7b70} .log .amber{color:#e0c46b}
+      .social-post { background: #1c3034; border-radius: 8px; padding: 16px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+      .social-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+      .avatar { width: 40px; height: 40px; border-radius: 50%; background-size: cover; background-position: center; border: 2px solid #4a7772; }
+      .username { font-weight: bold; color: var(--accent); }
+      .timestamp { font-size: 12px; color: var(--ink-weak); margin-left: auto; }
+      .post-content { line-height: 1.6; color: var(--ink); font-size: 15px; }
+      .post-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--ink-weak); margin-top: 12px; }
+      .comments-section { border-top: 1px solid #2a3648; margin-top: 16px; padding-top: 16px; }
+      .comment { display: flex; gap: 10px; margin-bottom: 10px; }
+      .comment-user { font-weight: bold; color: #b0c4de; }
+      .comment-text { color: var(--ink); }
       .timeline{border-left:3px solid #6d86a6; margin:10px 0 10px 6px; padding-left:14px; position:relative;}
       .timeline-container { position: relative; }
       .timeline-line {
@@ -161,37 +173,20 @@
         background-color: #6d86a6;
         transform: translateY(-2px);
       }
-      .info-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-      }
-      .modal-content {
-        background: #2a3648;
-        padding: 24px;
-        border-radius: 8px;
+      #info-message {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #1c3034;
         border: 1px solid #4a7772;
-        width: 90%;
-        max-width: 450px;
-        text-align: center;
-        box-shadow: 0 8px 24px rgba(0,0,0,.5);
-        position: relative;
         color: var(--ink);
+        border-radius: 4px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
       }
-      .close-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 24px;
-        cursor: pointer;
-        color: var(--ink-weak);
+      #info-message.visible {
+        opacity: 1;
+        transform: translateY(0);
       }
     </style>
 </head>
@@ -212,7 +207,7 @@
       </div>
       <div class="title">
         <h1>화면 속의 흔적</h1>
-        <small>사건 번호: SCB-2018-9321-77 • 사이버 불링 사망 사건 • 기밀</small>
+        <small>사건 번호: SCB-2018-0919-417-B • 사이버 불링 사망 사건 • 기밀</small>
       </div>
     </header>
     <div class="ribbon">
@@ -223,6 +218,7 @@
       <a href="#background">사건 배경</a>
       <a href="#timeline">사건 일지</a>
       <a href="#evidence">증거 기록</a>
+      <a href="#social-media">SNS 기록</a>
       <a href="#analysis">분석 보고서</a>
       <a href="#postmortem">사체 검시 보고서</a>
       <a href="#aftermath">사후 경과</a>
@@ -231,7 +227,7 @@
       <a href="#faq">FAQ</a>
     </nav>
     <section id="summary" class="animated-section">
-      <h2>사건 개요 <span class="badge">SCB-2018-9321-77-A</span></h2>
+      <h2>사건 개요 <span class="badge">SCB-2018-0919-417-B-A</span></h2>
       <p>
         2018년 6월 5일, 서울 강남구의 한 고등학교에 재학 중인 김지아(17)가 자택에서 의식불명 상태로 발견되어 사망했다. 수사 결과, 그녀의 죽음은 단순한 사고가 아닌, 수개월에 걸쳐 이어진 심각한 사이버 불링과 정신적 압박으로 인한 것으로 밝혀졌다. 김지아는 평소 내성적인 성격으로 현실 세계에서는 소외되어 있었으며, 온라인 블로그에 시와 글을 올리는 것으로 자신을 표현했다. 그러나 익명의 온라인 이용자들은 그녀의 글을 비난하고 조롱하며 모욕적인 댓글을 지속적으로 달았다. 이러한 무관심과 조롱은 김지아를 극도의 고통으로 몰아넣었고, 그녀가 도움을 요청했을 때조차 학교와 주변 사람들은 이를 심각하게 받아들이지 않았다. 본 문서는 사이버 공간의 무심한 폭력이 한 소녀의 삶을 어떻게 파괴했는지에 대한 뼈아픈 기록이다.
       </p>
@@ -250,7 +246,7 @@
         </div>
         <div class="idcard">
           <b>정현수 (주요 가해자)</b><br>
-          정체: 불명. CIA 요원 분석 결과.
+          정체: 불명. FBI 요원 분석 결과.
           <br>
           특징: 김지아의 중학교 동창. 중학교 시절부터 김지아에게 열등감을 느껴왔다는 정황이 포착됨. 온라인에서 악성 댓글을 주도한 것으로 파악됨.
         </div>
@@ -265,18 +261,26 @@
         <div class="timeline-line"></div>
         <div class="timeline">
           <div class="t" data-color="#7fd77f">
-            <b>2018년 1월</b>
-            김지아, 개인 블로그 개설. 주로 시와 단편 소설을 올리기 시작.
+            <b>2018년 1월 10일</b>
+            김지아, 개인 블로그 개설. 주로 시와 단편 소설을 올리기 시작. 평온한 시작.
           </div>
           <div class="t" data-color="#e0c46b">
-            <b>2018년 3월</b>
-            악성 댓글과 조롱이 시작됨. 블로그 방문자 수가 급증하며 악성 댓글 비율도 높아짐.
+            <b>2018년 3월 18일</b>
+            첫 번째 악성 댓글이 달리기 시작. "관심 받고 싶어서 발악하네" 같은 비난성 댓글이 주로 달림.
           </div>
           <div class="t" data-color="#ff7b70">
-            <b>2018년 5월 12일</b>
-            김지아, 담임 교사를 찾아가 사이버 불링 피해를 호소함. 교사는 이를 아이들 간의 장난으로 치부하며 별다른 조치를 취하지 않음.
+            <b>2018년 4월 20일</b>
+            일부 네티즌들이 김지아의 글을 캡쳐해 다른 커뮤니티에 올리고 조롱. 조롱의 수위가 높아지기 시작.
           </div>
           <div class="t" data-color="#d490b4">
+            <b>2018년 5월 12일</b>
+            김지아, 담임 교사를 찾아가 사이버 불링 피해를 호소했으나 별다른 조치 없이 상황 종결.
+          </div>
+          <div class="t" data-color="#90b4d4">
+            <b>2018년 5월 28일</b>
+            김지아, "누군가 나를 정말 아껴줬으면"이라는 제목의 글을 올리며 힘든 심정을 토로. 이것이 가해자들의 본격적인 공격을 유발한 것으로 추정.
+          </div>
+          <div class="t" data-color="#90b4d4">
             <b>2018년 6월 4일, 22:30</b>
             김지아의 블로그에 마지막 글이 게시됨. 이전 글들과는 확연히 다른, 절망적인 내용이 담겨있었음. 이 글을 마지막으로 블로그의 모든 글이 삭제됨.
           </div>
@@ -324,7 +328,7 @@
             지아야, 괜찮아? 왜 전화 안 받아?
             <br><span class="muted">2018.06.04 | 23:55 | 박민지:</span>
             지아! 너 마지막 글... 무슨 말인지 모르겠어. 제발 답장해줘.
-            <br><span class="muted">2018.06.05 | 00:05 | 이준호:</span>
+            <br><span class="muted">2018.06.05 | 01:05 | 이준호:</span>
             야, 김지아! 왜 갑자기 글 다 지웠어? 무슨 일 있어?
             <br><span class="muted">2018.06.05 | 01:20 | 김하나:</span>
             지아야, 나 너무 걱정돼. 경찰에 신고할까?
@@ -336,6 +340,63 @@
         <b>수사관 소견:</b> 김지아의 블로그 글은 그녀의 절망감을 명확하게 보여준다. 교사의 진술은 학교와 사회 시스템이 온라인 폭력의 심각성을 인지하지 못했음을 입증한다.
       </div>
     </section>
+    <section id="social-media" class="animated-section">
+      <h2>SNS 기록</h2>
+      <p>
+        피해자 김지아의 SNS 계정에서 수집한 악성 댓글 기록입니다.
+      </p>
+      <div class="social-post">
+          <div class="social-header">
+              <div class="avatar" style="background-image: url('https://i.ibb.co.com/57PYfNh/1.png');"></div>
+              <span class="username">김지아</span>
+              <span class="timestamp">2018년 5월 28일</span>
+          </div>
+          <div class="post-content">
+              <p>
+                  너무 지쳐. 온통 혼자 있는 기분이야. 부모님은 바쁘고, 친구들은 신경도 안 쓰고, 정말 사랑이 필요해. 누군가 내 이야기를 들어줬으면... 누군가 나를 정말 아껴줬으면...
+              </p>
+          </div>
+          <div class="post-meta">
+              <span>7 likes</span>
+              <span>5 comments</span>
+          </div>
+          <div class="comments-section">
+              <div class="comment">
+                  <div>
+                      <span class="comment-user">악마의_눈빛21</span>
+                      <span class="comment-text">징징거리지 마. 부모님 등골 빼먹으면서 편하게 살잖아. 무슨 관심병 환자도 아니고, 동정심 유발해서 얻으려는 게 뭐야? 한심해.</span>
+                  </div>
+              </div>
+              <div class="comment">
+                  <div>
+                      <span class="comment-user">사랑_가득</span>
+                      <span class="comment-text">괜찮아요, 힘내세요. 힘든 일은 언젠가 지나가요. :)</span>
+                  </div>
+              </div>
+              <div class="comment">
+                <div>
+                    <span class="comment-user">악마의_눈빛21</span>
+                    <span class="comment-text"> @사랑_가득 관심도 없는 애한테 왜 위로함? ㅋㅋㅋㅋㅋㅋ 웃기네.</span>
+                </div>
+              </div>
+              <div class="comment">
+                <div>
+                    <span class="comment-user">악마의_눈빛21</span>
+                    <span class="comment-text">솔직히 네 글 다 똑같아. 맨날 우울한 척, 감성적인 척. 토나와.</span>
+                </div>
+              </div>
+              <div class="comment">
+                <div>
+                    <span class="comment-user">악마의_눈빛21</span>
+                    <span class="comment-text">니 글이 얼마나 유치한지 알기나 하냐? 현실은 시궁창인데 혼자서 똥폼 잡네.</span>
+                </div>
+              </div>
+          </div>
+      </div>
+      <div class="callout">
+        <b>분석 소견:</b> "악마의_눈빛21" 계정은 여러 게시물에 걸쳐 피해자에 대한 지속적인 모욕과 비난을 가한 것으로 확인됩니다. 특히 그의 댓글은 피해자의 감정을 직접적으로 공격하며 정신적 고통을 가중시켰습니다. FBI 분석 결과, 이 계정은 다른 게시물에서도 유사한 패턴의 공격적인 댓글을 남긴 기록이 있습니다.
+      </div>
+    </section>
     <section id="analysis" class="animated-section">
       <h2>분석 보고서</h2>
       <p>
@@ -345,7 +406,7 @@
         가장 비극적인 부분은 그녀의 고통이 무시되었다는 점이다. 교사와 친구들의 신경 쓰지 마라라는 말은 그녀의 마지막 희망을 앗아갔다. 이는 사이버 불링이 피해자 개인의 문제로 치부되는 사회적 인식을 보여준다. 정신적 폭력은 물리적 폭력만큼이나 심각한 상처를 남기며, 때로는 더 치명적일 수 있다.
       </p>
       <div class="callout">
-        <b>CIA 요원의 특별 분석:</b> 익명성을 사용한 주요 가해자는 피해자의 중학교 동창인 정현수로 파악됩니다. 그의 신분은 가려져 있지만, 그의 온라인 활동과 중학교 시절 피해자에 대한 질투 정황을 근거로 이 결론에 도달했습니다.
+        <b>FBI 요원의 특별 분석:</b> 익명성을 사용한 주요 가해자는 피해자의 중학교 동창인 정현수로 파악됩니다. 그의 신분은 가려져 있지만, 그의 온라인 활동과 중학교 시절 피해자에 대한 질투 정황을 근거로 이 결론에 도달했습니다.
       </div>
     </section>
     <section id="postmortem" class="animated-section">
@@ -395,41 +456,37 @@
       </ul>
     </section>
     <section id="faq" class="animated-section">
-      <h2>질문과 답변</h2>
-      <p>
-        이 사건과 사이버 불링에 대해 자주 묻는 질문들입니다.
-      </p>
+      <h2>Q&A (질문과 답변)</h2>
       <div class="callout">
-        <b>Q: 사이버 불링은 왜 현실 불링보다 더 위험한가요?</b><br>
-        A: 사이버 불링은 익명성과 전파력 때문에 더 위험합니다. 가해자는 자신의 행동에 대한 책임감을 느끼지 못하고, 피해자는 24시간 내내 괴롭힘에 노출될 수 있습니다. 온라인에 한번 퍼진 내용은 영원히 사라지지 않을 수 있습니다.
-      </div>
+        <b>[익명123]:</b> "피해자는 왜 부모님이나 친구들에게 이야기하지 않았나요? 관심이 필요했던 것 같은데."<br>
+        A: 좋은 질문입니다. 피해자의 기록을 보면, 그녀는 부모님이 바쁘고 친구들이 무관심하다고 느꼈습니다. 종종 사이버 불링 피해자들은 수치심이나 믿어주지 않을까 하는 두려움 때문에 침묵을 택합니다. 그들은 도움을 절실히 필요로 하지만, 요청하기 어려워합니다.
+    </div>
       <div class="callout">
-        <b>Q: 사이버 불링 가해자는 어떻게 처벌되나요?</b><br>
-        A: 사이버 불링은 명예훼손, 모욕, 협박 등 여러 법률 위반에 해당될 수 있습니다. 가해자는 민사상 손해배상과 형사상 처벌을 받을 수 있습니다. 그러나 익명성 때문에 추적이 어려운 경우가 많습니다.
-      </div>
+        <b>[진실추적자]:</b> "FBI는 어떻게 익명 계정의 데이터를 찾아냈나요? 계정은 익명 아닌가요?"<br>
+        A: 저희 사이버팀은 온라인 활동을 추적하는 첨단 도구를 보유하고 있습니다. 악성 댓글은 익명의 이름으로 달렸지만, IP 주소, 게시물 시간, 그리고 행동 패턴과 같은 디지털 흔적은 누가 그 계정 뒤에 있는지 식별하는 데 사용될 수 있습니다.
+    </div>
       <div class="callout">
-        <b>Q: 사이버 불링 피해를 막기 위해 학교나 교육 당국이 할 수 있는 일은 무엇인가요?</b><br>
-        A: 사이버 윤리 교육을 강화하고, 피해자 보호를 위한 명확한 가이드라인을 수립해야 합니다. 또한, 피해 학생이 안심하고 도움을 요청할 수 있는 비밀스러운 상담 시스템을 구축하는 것이 중요합니다.
-      </div>
+        <b>[평화주의자]:</b> "만약 SNS에서 누군가가 괴롭힘을 당하는 것을 본다면 우리는 무엇을 할 수 있나요?"<br>
+        A: 가장 먼저 할 수 있는 일은 그 게시물이나 댓글을 신고하는 것입니다. 둘째, 가능하다면 피해자에게 개인 메시지를 보내어 지지를 표명하세요. 절대 부정적인 콘텐츠를 확산하는 데 동참하지 마십시오.
+    </div>
     </section>
     <footer>
       <div>
-        강남 경찰서 사이버 수사대 • 사건 번호: SCB-2018-9321-77 • 기밀
+        강남 경찰서 사이버 수사대 • 사건 번호: SCB-2018-0919-417-B • 기밀
       </div>
-      <button id="info-button" class="info-btn" disabled>
+      <button id="info-button" class="info-btn">
         <span>추가 정보</span>
-        <span id="countdown"></span>
       </button>
+      <div id="info-message">
+        <p><strong>문서 분류</strong></p>
+        <p>
+            이 문서는 창작물입니다. 이 기사의 인물, 이름, 장소 및 사건은 모두 허구이며 실제 인물, 장소 또는 역사적 사건과 관련이 없습니다. 모든 유사점은 순전히 우연의 일치입니다.
+        </p>
+        <p style="margin-top: 10px; font-size: 13px;">
+            이 문서는 독자 여러분이 더 깊이 생각하도록 격려하기 위해 작성되었습니다.
+        </p>
+      </div>
     </footer>
-    <div id="info-modal" class="info-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h3>문서 분류</h3>
-            <p style="margin-top: 10px; font-size: 14px;">
-                이 문서는 창작물입니다. 이 기사의 인물, 이름, 장소 및 사건은 모두 허구이며 실제 인물, 장소 또는 역사적 사건과 관련이 없습니다. 모든 유사점은 순전히 우연의 일치입니다. 이 문서는 독자 여러분이 더 깊이 생각하도록 격려하기 위해 작성되었습니다.
-            </p>
-        </div>
-    </div>
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -450,19 +507,21 @@
         const loadingScreen = document.getElementById('loading-screen');
         const loadingTextElement = document.getElementById('loading-text');
         
+        document.body.classList.add('no-scroll');
         loadingTextElement.textContent = loadingTexts[Math.floor(Math.random() * loadingTexts.length)];
         
         setTimeout(() => {
             loadingScreen.style.opacity = '0';
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
+                document.body.classList.remove('no-scroll');
             }, 1000);
         }, 7000);
 
         const sections = document.querySelectorAll('.animated-section');
         const timelinePoints = document.querySelectorAll('.timeline .t');
         const timelineLine = document.querySelector('.timeline-line');
-        const pointColors = ['#7fd77f', '#e0c46b', '#ff7b70', '#d490b4', '#90b4d4', '#90b4d4', '#90b4d4'];
+        const pointColors = ['#7fd77f', '#e0c46b', '#ff7b70', '#d490b4', '#90b4d4', '#90b4d4', '#90b4d4', '#90b4d4', '#90b4d4'];
 
         const observerOptions = {
             root: null,
@@ -548,41 +607,19 @@
             document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
         });
 
+        // "Additional Information" button logic
         const infoButton = document.getElementById('info-button');
-        const countdownSpan = document.getElementById('countdown');
-        const modal = document.getElementById('info-modal');
-        const closeBtn = document.querySelector('.close-btn');
-        const totalTime = 60;
-        let timeLeft = totalTime;
+        const infoMessage = document.getElementById('info-message');
+        const readTimeInSeconds = 60; // 1 minute
 
-        const updateCountdown = () => {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            countdownSpan.textContent = `(${minutes}:${seconds.toString().padStart(2, '0')})`;
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-                countdownSpan.textContent = '';
-                infoButton.disabled = false;
-                infoButton.classList.add('active');
-            }
-            timeLeft--;
-        };
-
-        const countdownInterval = setInterval(updateCountdown, 1000);
+        let readTimer = setTimeout(() => {
+            infoButton.classList.add('active');
+            infoButton.disabled = false;
+        }, readTimeInSeconds * 1000);
 
         infoButton.addEventListener('click', () => {
-            if (!infoButton.disabled) {
-                modal.style.display = 'flex';
-            }
-        });
-
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
+            if (infoButton.classList.contains('active')) {
+                infoMessage.classList.toggle('visible');
             }
         });
     });
