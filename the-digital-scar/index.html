@@ -24,7 +24,7 @@
         box-shadow: 0 30px 60px var(--shadow), 2px 0 0 var(--paper-dark) inset;
         position: relative; overflow: clip; border-radius: 8px; transform-style: preserve-3d; }
       .page:before{content:""; position:absolute; inset:0; pointer-events:none;
-        background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" type="fractalNoise"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .15 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>'); mix-blend-mode:multiply; opacity:.15; }
+        background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" type="fractalNoise"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .15 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>'); mix-blend-mode:multiply; opacity:.15; }
       .stamp{position:absolute; right: -18px; top: 40px; transform: rotate(12deg); border: 2px solid var(--accent-dim); color: var(--accent-dim); padding: 8px 14px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; filter: drop-shadow(0 6px 6px rgba(0,0,0,.2)); background: #2e3b50; z-index: 100; border-radius: 4px;}
       header{display:flex; align-items:center; gap:18px; margin-bottom:14px; transform: translateZ(2px);}
       .seal{width:64px; height:64px; border:2px solid var(--accent-dim); border-radius:50%; display:grid; place-items:center; font-weight:800; color:var(--accent-dim); box-shadow:0 0 0 3px rgba(114,215,255,.12) inset; background: #2e3b50; transform: translateZ(2px);}
@@ -121,34 +121,6 @@
         from { opacity: 0; transform: translateX(-50%) translateY(20px); }
         to { opacity: 1; transform: translateX(-50%) translateY(0); }
       }
-      #loading-screen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: #1a2a4b;
-        color: #fff;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 999;
-        transition: opacity 1s ease-out;
-      }
-      #loading-spinner {
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid #fff;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        animation: spin 1s linear infinite;
-        margin-bottom: 20px;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
       .info-btn {
         background-color: #4a7772;
         color: var(--ink);
@@ -188,13 +160,66 @@
         opacity: 1;
         transform: translateY(0);
       }
+      #if-only-scenarios {
+        margin-top: 40px;
+      }
+      .scenario-btn {
+        background-color: #2a3648;
+        color: var(--ink);
+        border: 1px solid var(--accent-dim);
+        padding: 12px 20px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background-color 0.3s, transform 0.3s;
+        border-radius: 4px;
+        width: 100%;
+        text-align: left;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .scenario-btn:hover {
+        background-color: #3e4b60;
+        transform: translateX(4px);
+      }
+      .scenario-btn-icon {
+        transition: transform 0.3s;
+      }
+      .scenario-result {
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #1c3034;
+        border: 1px solid #4a7772;
+        color: var(--ink);
+        border-radius: 4px;
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: opacity 0.5s ease-in-out, max-height 0.7s ease-in-out;
+      }
+      .scenario-result.visible {
+        opacity: 1;
+        max-height: 200px;
+      }
+      .interview-q {
+        margin-top: 20px;
+        font-style: italic;
+        color: var(--accent);
+      }
+      .interview-a {
+        padding: 12px;
+        border-left: 3px solid var(--accent-dim);
+        margin-top: 8px;
+        background-color: #1c3034;
+        border-radius: 4px;
+        line-height: 1.6;
+      }
     </style>
 </head>
 <body>
-  <div id="loading-screen">
-    <div id="loading-spinner"></div>
-    <div id="loading-text" class="text-lg"></div>
-  </div>
   <main class="page" role="document">
     <div class="stamp" aria-label="기록됨">
       기록됨
@@ -211,7 +236,7 @@
       </div>
     </header>
     <div class="ribbon">
-      공식 요약 — 극비 문서
+      공식 요약 — 공개 배포 사본
     </div>
     <nav aria-label="섹션">
       <a href="#summary">개요</a>
@@ -220,6 +245,7 @@
       <a href="#evidence">증거 기록</a>
       <a href="#social-media">SNS 기록</a>
       <a href="#analysis">분석 보고서</a>
+      <a href="#interview">특별 인터뷰</a>
       <a href="#postmortem">사체 검시 보고서</a>
       <a href="#aftermath">사후 경과</a>
       <a href="#conclusion">결론</a>
@@ -409,6 +435,30 @@
         <b>FBI 요원의 특별 분석:</b> 익명성을 사용한 주요 가해자는 피해자의 중학교 동창인 정현수로 파악됩니다. 그의 신분은 가려져 있지만, 그의 온라인 활동과 중학교 시절 피해자에 대한 질투 정황을 근거로 이 결론에 도달했습니다.
       </div>
     </section>
+    <section id="interview" class="animated-section">
+        <h2>특별 인터뷰</h2>
+        <p>사건에 대한 더 깊은 통찰력을 얻기 위해 전문가들과 대화했습니다. 다음은 저희 인터뷰의 일부 발췌 내용입니다.</p>
+
+        <div class="callout">
+            <h3>박민준 박사, 청소년 심리학자</h3>
+            <p class="interview-q">"온라인 환경이 지아와 같은 청소년의 정신 건강에 어떻게 영향을 미쳤습니까?"</p>
+            <p class="interview-a">
+                "고립감을 느끼는 청소년들에게 온라인 세상은 피난처이자 자신을 표현할 수 있는 공간이 될 수 있습니다. 하지만 그 공간이 증오와 괴롭힘으로 채워질 때, 그 영향은 파괴적입니다. 지아는 유일한 표현 수단을 잃었을 뿐만 아니라, 끊임없는 공격으로 인해 무가치함을 느끼게 되었습니다."
+            </p>
+            <p class="interview-q">"부모와 교사가 주의해야 할 징후는 무엇입니까?"</p>
+            <p class="interview-a">
+                "갑작스러운 행동 변화, 예를 들어 은둔, 이전에 좋아하던 취미에 대한 흥미 상실, 또는 불안감 증가 등입니다. 아이들이 판단받을까 두려워하지 않고 편안하게 이야기할 수 있는 안전한 공간을 만드는 것이 매우 중요합니다."
+            </p>
+        </div>
+
+        <div class="callout">
+            <h3>이지훈, 사이버 법률 전문가</h3>
+            <p class="interview-q">"익명으로 저질러지는 사이버 범죄를 기소하기 어려운 이유는 무엇입니까?"</p>
+            <p class="interview-a">
+                "법적으로 표현의 자유는 온라인 익명성을 어느 정도 보호합니다. 그러나 협박, 명예훼손, 체계적인 괴롭힘으로 변질될 경우, 우리는 조치를 취할 수 있습니다. 주요 도전 과제는 다양한 플랫폼에서 강력한 디지털 증거를 수집하고, 관련 IP 주소를 추적하기 위해 서비스 제공업체와 협력하는 것입니다. 어렵긴 하지만, 불가능한 것은 아닙니다."
+            </p>
+        </div>
+    </section>
     <section id="postmortem" class="animated-section">
       <h2>사체 검시 보고서</h2>
       <p>
@@ -470,6 +520,36 @@
         A: 가장 먼저 할 수 있는 일은 그 게시물이나 댓글을 신고하는 것입니다. 둘째, 가능하다면 피해자에게 개인 메시지를 보내어 지지를 표명하세요. 절대 부정적인 콘텐츠를 확산하는 데 동참하지 마십시오.
     </div>
     </section>
+    <section id="if-only-scenarios" class="animated-section">
+        <h2>만약 그랬다면...? (가상 시나리오)</h2>
+        <p>이 버튼을 눌러보세요. 만약 이 사건의 흐름이 조금이라도 달랐다면 어떻게 되었을지 알 수 있습니다.</p>
+        <button class="scenario-btn" data-scenario="teacher">
+            <span>만약 담임 선생님이 지아의 요청을 심각하게 받아들였다면?</span>
+            <span class="scenario-btn-icon">▼</span>
+        </button>
+        <div id="result-teacher" class="scenario-result">
+            <p>
+                만약 선생님이 지아의 요청을 진지하게 듣고 즉시 학교 차원의 조사를 시작했다면, 악성 댓글을 달던 가해자들을 조기에 찾아낼 수 있었을 것입니다. 학교는 지아를 보호하고 가해 학생에게 징계를 내릴 수 있었을 것이며, 이는 지아에게 큰 힘이 되었을 것입니다. 그녀의 고통이 무시되지 않았다는 사실만으로도 비극은 막을 수 있었을 것입니다.
+            </p></div>
+        <button class="scenario-btn" data-scenario="friends">
+            <span>만약 친구들이 지아의 마지막 메시지에 응답했다면?</span>
+            <span class="scenario-btn-icon">▼</span>
+        </button>
+        <div id="result-friends" class="scenario-result">
+            <p>
+                만약 친구들 중 한 명이라도 그녀의 절박한 메시지에 응답하고 전화를 받았다면, 지아는 혼자가 아니라고 느꼈을 것입니다. 친구와의 대화는 그녀에게 희망의 끈이 되었을 것이고, 즉각적인 도움을 요청할 용기를 주었을지도 모릅니다. 마지막 순간의 소통은 비극을 막는 데 결정적인 역할을 할 수 있었을 것입니다.
+            </p>
+        </div>
+        <button class="scenario-btn" data-scenario="community">
+            <span>만약 온라인 커뮤니티가 지아를 지지했다면?</span>
+            <span class="scenario-btn-icon">▼</span>
+        </button>
+        <div id="result-community" class="scenario-result">
+            <p>
+                만약 "악마의_눈빛21" 같은 악플러들이 아니라, 더 많은 사람이 "사랑_가득"처럼 지아를 지지하는 댓글을 남겼다면 어땠을까요? 긍정적인 댓글과 위로는 부정적인 목소리를 묻어버릴 수 있었을 것입니다. 커뮤니티의 집단적인 지지는 지아에게 심리적인 안정감을 주고, 온라인 공간이 더 이상 위험한 곳이 아니라는 인식을 심어줄 수 있었을 것입니다.
+            </p>
+        </div>
+    </section>
     <footer>
       <div>
         강남 경찰서 사이버 수사대 • 사건 번호: SCB-2018-0919-417-B • 기밀
@@ -490,34 +570,6 @@
   </main>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const loadingTexts = [
-            '디지털 기록을 분석 중...',
-            '사이버 흔적을 추적 중...',
-            '피해자의 흔적을 복원 중...',
-            '진실의 퍼즐을 맞추는 중...',
-            '기록을 검증하는 중...',
-            '비극의 시작점을 찾는 중...',
-            '진실의 서문을 여는 중...',
-            '모든 조각을 연결하는 중...',
-            '사이버 공간의 그림자를 파헤치는 중...',
-            '데이터베이스를 교차 검증하는 중...',
-            '마지막 메시지를 해독하는 중...'
-        ];
-
-        const loadingScreen = document.getElementById('loading-screen');
-        const loadingTextElement = document.getElementById('loading-text');
-        
-        document.body.classList.add('no-scroll');
-        loadingTextElement.textContent = loadingTexts[Math.floor(Math.random() * loadingTexts.length)];
-        
-        setTimeout(() => {
-            loadingScreen.style.opacity = '0';
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                document.body.classList.remove('no-scroll');
-            }, 1000);
-        }, 7000);
-
         const sections = document.querySelectorAll('.animated-section');
         const timelinePoints = document.querySelectorAll('.timeline .t');
         const timelineLine = document.querySelector('.timeline-line');
@@ -621,6 +673,25 @@
             if (infoButton.classList.contains('active')) {
                 infoMessage.classList.toggle('visible');
             }
+        });
+        
+        // "What If" scenarios logic
+        const scenarioButtons = document.querySelectorAll('.scenario-btn');
+        scenarioButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const scenarioId = button.dataset.scenario;
+                const resultElement = document.getElementById(`result-${scenarioId}`);
+                
+                // Close all other scenarios
+                document.querySelectorAll('.scenario-result').forEach(result => {
+                    if (result.id !== `result-${scenarioId}`) {
+                        result.classList.remove('visible');
+                    }
+                });
+
+                // Toggle the clicked scenario
+                resultElement.classList.toggle('visible');
+            });
         });
     });
   </script>
