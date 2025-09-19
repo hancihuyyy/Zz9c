@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>화면 속의 흔적</title>
+    <meta name="description" content="사이버 불링 희생자에 대한 비공개 문서.">
+    <style>
+      :root{
+        --ink:#e0e0e0; --ink-weak:#a9a9a9; --accent:#90b4d4; --accent-dim:#6d86a6;
+        --paper:#111827; --paper-edge:#1f2937; --paper-dark:#2a3648; --shadow:rgba(0,0,0,.5);
+      }
+      html,body{height:100%}
+      body{
+        margin:0; color:var(--ink); background:
+          radial-gradient(1200px 700px at 10% 10%, rgba(255,255,255,.02), transparent 60%),
+          radial-gradient(900px 600px at 90% 0%, rgba(255,255,255,.01), transparent 60%),
+          linear-gradient(180deg, #111827 0%, #171d2b 100%);
+        font-family: "IBM Plex Mono", "Courier New", Courier, monospace; letter-spacing:.2px;
+        overflow-x: hidden;
+      }
+      .page{ max-width: 980px; margin: 40px auto; padding: 38px 38px 60px; background-color: var(--paper-edge);
+        box-shadow: 0 30px 60px var(--shadow), 2px 0 0 var(--paper-dark) inset;
+        position: relative; overflow: clip; border-radius: 8px; transform-style: preserve-3d; }
+      .page:before{content:""; position:absolute; inset:0; pointer-events:none;
+        background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" type="fractalNoise"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .15 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>'); mix-blend-mode:multiply; opacity:.15; }
+      .stamp{position:absolute; right: -18px; top: 40px; transform: rotate(12deg); border: 2px solid var(--accent-dim); color: var(--accent-dim); padding: 8px 14px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; filter: drop-shadow(0 6px 6px rgba(0,0,0,.2)); background: #2e3b50; z-index: 100; border-radius: 4px;}
+      header{display:flex; align-items:center; gap:18px; margin-bottom:14px; transform: translateZ(2px);}
+      .seal{width:64px; height:64px; border:2px solid var(--accent-dim); border-radius:50%; display:grid; place-items:center; font-weight:800; color:var(--accent-dim); box-shadow:0 0 0 3px rgba(114,215,255,.12) inset; background: #2e3b50; transform: translateZ(2px);}
+      .seal span{font-size:11px; line-height:1.1; text-align:center; letter-spacing:1.3px}
+      .title h1{margin:0; font-size:28px; letter-spacing:1.2px; text-transform:uppercase}
+      .title small{display:block; color:var(--ink-weak); margin-top:4px}
+      .ribbon{margin:16px 0 22px; padding:10px 14px; border:1px dashed var(--accent); background: repeating-linear-gradient(-45deg, #22373b, #22373b 8px, #1c3034 8px, #1c3034 16px); color:var(--accent); font-weight:700; text-transform:uppercase; display:flex; align-items:center; gap:10px; letter-spacing:1px; border-radius: 4px; transform: translateZ(1px);}
+      nav{margin: 14px 0 22px; font-size:13px; border-top:1px solid #335750; border-bottom:1px solid #335750; padding:10px 0; display:flex; gap:14px; flex-wrap:wrap; transform: translateZ(1px);}
+      nav a{color:var(--ink-weak); text-decoration:none; border-bottom:1px dotted var(--ink-weak)}
+      nav a:hover{color:var(--accent); border-color:var(--accent)}
+      h2{font-size:20px; margin:26px 0 10px; text-transform:uppercase; letter-spacing:1px; color: var(--accent);}
+      h3{font-size:16px; margin:18px 0 8px; letter-spacing:.6px; color: var(--ink-weak);}
+      p{line-height:1.6; margin:8px 0}
+      ul{margin:8px 0 8px 18px}
+      .muted{color:var(--ink-weak)}
+      .badge{font-size:11px; padding:2px 6px; border:1px solid #4a7772; margin-left:6px; color: var(--accent); border-radius: 4px;}
+      .callout{border:1px solid #4a7772; padding:12px 14px; background:#1c3034; margin:12px 0; border-radius: 4px;}
+      .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+      .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px}
+      @media (max-width: 920px){.grid,.grid-3{grid-template-columns:1fr}}
+      .idcard{border:1px solid #4a7772; padding:10px 12px; background:#1c3034; border-radius: 4px;}
+      .idcard b{display:block; font-size:14px; color: var(--accent)}
+      .log{background:#0a0e16; color:#a9a9a9; border:1px solid #2a3648; padding:12px; font-size:13px; box-shadow:0 10px 20px rgba(0,0,0,.25) inset; border-radius: 4px;}
+      .log .green{color:#7fd77f} .log .red{color:#ff7b70} .log .amber{color:#e0c46b}
+      .timeline{border-left:3px solid #6d86a6; margin:10px 0 10px 6px; padding-left:14px; position:relative;}
+      .timeline-container { position: relative; }
+      .timeline-line {
+        position: absolute;
+        top: 0;
+        left: 6px;
+        width: 3px;
+        height: 100%;
+        background-color: #6d86a6;
+        transition: background-color 0.5s linear;
+      }
+      .timeline .t{margin:12px 0; position:relative; padding-left:20px; color: var(--ink-weak); transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+      .timeline .t.active { color: var(--ink); }
+      .timeline .t:before{content:''; position:absolute; left:-18px; top:50%; transform:translateY(-50%) scale(0); width:12px; height:12px; background:#1c3034; border:2px solid; border-radius:50%; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), background-color 0.4s ease-in-out, border-color 0.4s ease-in-out;}
+      .timeline .t.active:before { transform: translateY(-50%) scale(1.3); }
+      .timeline .t b{display:inline-block; width:150px; color: var(--accent)}
+      .animated-section { opacity: 0; transform: translateY(20px) scale(0.98); transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+      .animated-section.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+      footer{margin-top:40px; padding-top:12px; border-top:1px solid #335750; font-size:12px; color:var(--ink-weak); transform: translateZ(1px);}
+      @keyframes blink { 50%{opacity:.1} }
+      .cursor{display:inline-block; width:8px; background:#e0e0e0; animation: blink .9s step-end infinite}
+      .note-container {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        border-bottom: 1px dotted var(--ink-weak);
+      }
+      .note {
+        display: none;
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2a3648;
+        border: 1px solid #4a7772;
+        padding: 8px;
+        width: 250px;
+        font-size: 12px;
+        color: var(--ink);
+        box-shadow: 0 4px 12px rgba(0,0,0,.25);
+        z-index: 50;
+        animation: fadeIn 0.3s ease-out;
+        border-radius: 4px;
+      }
+      .note::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -5px;
+        transform: translateX(-50%) rotate(45deg);
+        width: 10px;
+        height: 10px;
+        background: #2a3648;
+        border-right: 1px solid #4a7772;
+        border-bottom: 1px solid #4a7772;
+        z-index: 49;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #1a2a4b;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        transition: opacity 1s ease-out;
+      }
+      #loading-spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .info-btn {
+        background-color: #4a7772;
+        color: var(--ink);
+        border: none;
+        padding: 10px 20px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,.15);
+        transition: background-color 0.3s, transform 0.3s;
+        border-radius: 4px;
+      }
+      .info-btn:hover {
+        background-color: #335750;
+        transform: translateY(-2px);
+      }
+      .info-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: #2a3648;
+        padding: 24px;
+        border-radius: 8px;
+        border: 1px solid #4a7772;
+        width: 90%;
+        max-width: 450px;
+        text-align: center;
+        box-shadow: 0 8px 24px rgba(0,0,0,.5);
+        position: relative;
+        color: var(--ink);
+      }
+      .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--ink-weak);
+      }
+    </style>
+</head>
+<body>
+  <div id="loading-screen">
+    <div id="loading-spinner"></div>
+    <div id="loading-text" class="text-lg"></div>
+  </div>
+  <main class="page" role="document">
+    <div class="stamp" aria-label="기록됨">
+      기록됨
+    </div>
+    <header>
+      <div class="seal" aria-hidden="true">
+        <span>강남<br>
+        경찰서<br>
+        수사 기록</span>
+      </div>
+      <div class="title">
+        <h1>화면 속의 흔적</h1>
+        <small>사건 번호: SB-2018-0605 • 사이버 불링 사망 사건 • 기밀</small>
+      </div>
+    </header>
+    <div class="ribbon">
+      공식 요약 — 극비 문서
+    </div>
+    <nav aria-label="섹션">
+      <a href="#summary">개요</a>
+      <a href="#background">사건 배경</a>
+      <a href="#timeline">사건 일지</a>
+      <a href="#evidence">증거 기록</a>
+      <a href="#analysis">분석 보고서</a>
+      <a href="#aftermath">사후 경과</a>
+      <a href="#conclusion">결론</a>
+      <a href="#advice">조언</a>
+    </nav>
+    <section id="summary" class="animated-section">
+      <h2>사건 개요 <span class="badge">SB-2018-0605A</span></h2>
+      <p>
+        2018년 6월 5일, 서울 강남구의 한 고등학교에 재학 중인 김지아(17)가 자택에서 의식불명 상태로 발견되어 사망했다. 수사 결과, 그녀의 죽음은 단순한 사고가 아닌, 수개월에 걸쳐 이어진 심각한 사이버 불링과 정신적 압박으로 인한 것으로 밝혀졌다. 김지아는 평소 내성적인 성격으로 현실 세계에서는 소외되어 있었으며, 온라인 블로그에 시와 글을 올리는 것으로 자신을 표현했다. 그러나 익명의 온라인 이용자들은 그녀의 글을 비난하고 조롱하며 모욕적인 댓글을 지속적으로 달았다. 이러한 무관심과 조롱은 김지아를 극도의 고통으로 몰아넣었고, 그녀가 도움을 요청했을 때조차 학교와 주변 사람들은 이를 심각하게 받아들이지 않았다. 본 문서는 사이버 공간의 무심한 폭력이 한 소녀의 삶을 어떻게 파괴했는지에 대한 뼈아픈 기록이다.
+      </p>
+      <div class="callout">
+        <b>주요 소견:</b> 본 사건은 사이버 불링이 단순한 놀림이 아니라 치명적인 결과를 초래할 수 있는 심각한 범죄임을 보여준다. 사회 전반의 무관심이 비극을 키웠다.
+      </div>
+    </section>
+    <section id="background" class="animated-section">
+      <h2>사건 배경 <span class="badge">피해자 프로필</span></h2>
+      <div class="grid">
+        <div class="idcard">
+          <b>김지아 (피해자)</b><br>
+          출생: 2001년 1월 12일<br>
+          학교: 강남여자고등학교 2학년<br>
+          특징: 내성적이고 조용한 성격. 교우 관계가 원만하지 않았으며, 학급 내에서 존재감이 미미한 편이었음. 문학에 재능이 있어 개인 블로그에 감성적인 글을 꾸준히 게재함.
+        </div>
+        <div class="idcard">
+          <b>익명 사용자들 (가해자)</b><br>
+          정체: 불명. 닉네임과 계정을 수시로 변경하는 특징.
+          <br>
+          특징: 김지아의 블로그에 지속적으로 악성 댓글을 게시함. 그들의 댓글은 오글거린다, 관종이냐, 재능도 없으면서와 같은 비난과 모욕적인 내용이 대부분이었음.
+        </div>
+      </div>
+      <p>
+        김지아는 2018년 초부터 익명의 악플에 시달리기 시작했다. 처음에는 몇몇 댓글에 불과했지만, 시간이 지나면서 그 숫자는 기하급수적으로 늘어났다. 일부 익명 사용자들은 김지아의 글을 캡처해 다른 커뮤니티에 올리고 조롱했다. 김지아는 이러한 상황을 친구들과 교사에게 호소했지만, 온라인은 원래 그렇다, 신경 쓰지 마라라는 무책임한 조언만 들었다. 그녀가 느꼈던 고립감은 점점 더 깊어졌다.
+      </p>
+    </section>
+    <section id="timeline" class="animated-section">
+      <h2>사건 일지</h2>
+      <div class="timeline-container">
+        <div class="timeline-line"></div>
+        <div class="timeline">
+          <div class="t" data-color="#7fd77f">
+            <b>2018년 1월</b>
+            김지아, 개인 블로그 개설. 주로 시와 단편 소설을 올리기 시작.
+          </div>
+          <div class="t" data-color="#e0c46b">
+            <b>2018년 3월</b>
+            악성 댓글과 조롱이 시작됨. 블로그 방문자 수가 급증하며 악성 댓글 비율도 높아짐.
+          </div>
+          <div class="t" data-color="#ff7b70">
+            <b>2018년 5월 12일</b>
+            김지아, 담임 교사를 찾아가 사이버 불링 피해를 호소함. 교사는 이를 아이들 간의 장난으로 치부하며 별다른 조치를 취하지 않음.
+          </div>
+          <div class="t" data-color="#d490b4">
+            <b>2018년 6월 4일</b>
+            김지아의 블로그에 마지막 글이 게시됨. 이전 글들과는 확연히 다른, 절망적인 내용이 담겨있었음. 이 글을 마지막으로 블로그의 모든 글이 삭제됨.
+          </div>
+          <div class="t" data-color="#90b4d4">
+            <b>2018년 6월 5일, 14:00</b>
+            자택에서 의식불명 상태로 발견됨. 가족에 의해 병원으로 이송되었으나, 늦은 시간으로 인해 결국 사망.
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="evidence" class="animated-section">
+      <h2>증거 기록</h2>
+      <div class="grid">
+        <div>
+          <h3>김지아의 블로그 마지막 글</h3>
+          <div class="log" role="log" aria-live="polite">
+            <span class="muted">2018.06.04</span>
+            저들은 내가 쓸모없다고 했다. 그들의 말이 맞는 것 같다. 내가 사라져도 세상은 아무렇지 않을 것이다.
+            <br><span class="muted">2018.06.04</span>
+            더 이상 쓸 힘도, 느낄 감정도 없다. 멈추고 싶다.
+            <br><span class="muted">2018.06.04</span>
+            안녕히 계세요. 행복하세요.
+            <span class="cursor">&nbsp;</span>
+          </div>
+        </div>
+        <div>
+          <h3>담임 교사 면담 녹취록</h3>
+          <div class="log" role="log" aria-live="polite">
+            <span class="muted">2018.06.06 | 11:20</span>
+            <span class="red">저는... 정말 몰랐습니다. 지아는 학교에서 티를 내지 않았어요.</span>
+            <br><span class="muted">2018.06.06 | 13:45</span>
+            <span class="amber">지아가 댓글 때문에 힘들다고 했을 때, 제가 괜찮아, 다 그런 거야라고 말했던 게 너무 후회됩니다. 제가 그때 제대로 봐줬어야 했는데...</span>
+            <span class="cursor">&nbsp;</span>
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <b>수사관 소견:</b> 김지아의 블로그 글은 그녀의 절망감을 명확하게 보여준다. 교사의 진술은 학교와 사회 시스템이 온라인 폭력의 심각성을 인지하지 못했음을 입증한다.
+      </div>
+    </section>
+    <section id="analysis" class="animated-section">
+      <h2>분석 보고서</h2>
+      <p>
+        본 사건의 핵심은 디지털 세계의 익명성이 초래한 무책임과 현실 세계의 무관심이다. 김지아는 현실에서 소외된 감정을 온라인에서 해소하려 했지만, 그 공간마저 폭력에 점령당했다. 가해자들은 자신의 행동이 가져올 결과를 전혀 고려하지 않았다. 그들은 김지아를 사람으로 보지 않고, 단지 익명의 조롱 대상일 뿐이었다.
+      </p>
+      <p>
+        가장 비극적인 부분은 그녀의 고통이 무시되었다는 점이다. 교사와 친구들의 신경 쓰지 마라라는 말은 그녀의 마지막 희망을 앗아갔다. 이는 사이버 불링이 피해자 개인의 문제로 치부되는 사회적 인식을 보여준다. 정신적 폭력은 물리적 폭력만큼이나 심각한 상처를 남기며, 때로는 더 치명적일 수 있다.
+      </p>
+    </section>
+    <section id="aftermath" class="animated-section">
+      <h2>사후 경과</h2>
+      <ul>
+        <li><b>온라인 커뮤니티:</b> 김지아의 죽음이 언론에 보도되자, 그녀의 블로그에 악성 댓글을 달았던 계정들이 대거 삭제되었다. 일부 네티즌들은 악플러들을 비난하며 추모 운동을 벌였으나, 일시적인 현상에 그쳤다.</li>
+        <li><b>학교 및 교육 당국:</b> 강남여자고등학교는 이번 사건에 대한 책임을 인정하고, 모든 학생들을 대상으로 사이버 윤리 교육을 강화했다. 교육 당국은 사이버 불링 가이드라인을 재정비하겠다고 발표했다.</li>
+        <li><b>유가족:</b> 김지아의 유가족은 딸의 블로그를 복구하여 추모 페이지로 만들고, 사이버 불링 근절을 위한 캠페인을 시작했다. 그들은 다른 피해자들이 자신들과 같은 비극을 겪지 않도록 목소리를 높이고 있다.</li>
+      </ul>
+      <div class="callout">
+        <b>최종 소견:</b> 이 사건은 디지털 시대에 우리가 잃어버린 인간성에 대한 경종을 울린다.
+      </div>
+    </section>
+    <section id="conclusion" class="animated-section">
+      <h2>결론</h2>
+      <p>
+        김지아 사망 사건은 한 소녀의 비극을 넘어, 우리 사회가 간과하고 있는 디지털 폭력의 심각성을 여실히 드러낸 사례이다. 익명 뒤에 숨어 행해지는 비겁한 폭력, 그리고 이를 방치하는 현실의 무관심이 결합되어 만들어낸 끔찍한 결과물이다. 우리는 이 사건을 통해 온라인에서 이루어지는 모든 행동이 현실에서와 마찬가지로 책임이 따른다는 것을 깊이 인식해야 한다. 김지아의 마지막 흔적은 화면 속에 남았지만, 그녀의 이야기는 우리가 더 이상 외면해서는 안 될 중요한 교훈을 남겼다.
+      </p>
+      <div class="callout">
+        <b>종결 보고:</b> 본 사건은 2018년 12월 1일부로 종결되었으며, 관련 기록은 영구 보존된다.
+      </div>
+    </section>
+    <section id="advice" class="animated-section">
+      <h2>조언과 메시지</h2>
+      <p>
+        이 조언은 피해자뿐만 아니라 우리 모두를 위한 것입니다. 더 안전하고 지지하는 온라인 환경을 만들어 갑시다.
+      </p>
+      <ul>
+        <li>
+          **피해자를 위한 조언:** 당신은 혼자가 아닙니다. 부모님, 선생님, 상담사 등 믿을 수 있는 어른에게 주저하지 말고 도움을 구하세요. 이야기하는 것이 어둠에서 벗어나는 첫걸음입니다.
+        </li>
+        <li>
+          **목격자를 위한 조언:** 누군가가 괴롭힘당하는 것을 본다면, 그냥 지나치지 마세요. 당신의 작은 관심이 큰 변화를 만들 수 있습니다. 그러한 행동을 신고하고 피해자를 지지해 주세요.
+        </li>
+        <li>
+          **우리 모두를 위한 조언:** 댓글을 달기 전에 한 번 더 생각하세요. 화면 뒤에는 감정을 가진 한 사람이 있습니다. 인터넷을 증오가 아닌, 선을 확산하는 데 사용합시다.
+        </li>
+      </ul>
+    </section>
+    <footer>
+      <div>
+        강남 경찰서 사이버 수사대 • 사건 번호: SB-2018-0605 • 기밀
+      </div>
+      <button id="info-button" class="info-btn">추가 정보</button>
+    </footer>
+    <div id="info-modal" class="info-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>문서 고지 사항</h3>
+            <p style="margin-top: 10px; font-size: 14px;">
+                본 문서는 픽션입니다. 등장인물, 지명, 사건은 모두 허구이며 실제 인물이나 사건과는 무관합니다. 모든 유사성은 우연일 뿐입니다.
+            </p>
+        </div>
+    </div>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loadingTexts = [
+            '디지털 기록을 분석 중...',
+            '사이버 흔적을 추적 중...',
+            '피해자의 흔적을 복원 중...',
+            '진실의 퍼즐을 맞추는 중...',
+            '기록을 검증하는 중...',
+            '비극의 시작점을 찾는 중...',
+            '진실의 서문을 여는 중...',
+            '모든 조각을 연결하는 중...'
+        ];
+
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingTextElement = document.getElementById('loading-text');
+        
+        loadingTextElement.textContent = loadingTexts[Math.floor(Math.random() * loadingTexts.length)];
+        
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 1000);
+        }, 7000);
+
+        const sections = document.querySelectorAll('.animated-section');
+        const timelinePoints = document.querySelectorAll('.timeline .t');
+        const timelineLine = document.querySelector('.timeline-line');
+        const pointColors = ['#7fd77f', '#e0c46b', '#ff7b70', '#d490b4', '#90b4d4'];
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1 
+        };
+
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                } else {
+                    entry.target.classList.remove('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        const timelineObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        const timelineProgressObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            const index = Array.from(timelinePoints).indexOf(entry.target);
+            if (entry.isIntersecting) {
+              timelineLine.style.backgroundColor = pointColors[index];
+            }
+          });
+        }, { threshold: 0.5 });
+
+
+        sections.forEach(section => sectionObserver.observe(section));
+        timelinePoints.forEach((point, index) => {
+          point.style.borderColor = pointColors[index];
+          point.style.color = pointColors[index];
+          point.querySelector('b').style.color = pointColors[index];
+          timelineObserver.observe(point);
+          timelineProgressObserver.observe(point);
+        });
+
+        const body = document.body;
+        const page = document.querySelector('.page');
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const parallaxValue = -scrollY * 0.05;
+            body.style.transform = `translateY(${parallaxValue}px)`;
+            page.style.transform = `translateY(${parallaxValue * 0.5}px) translateZ(0)`;
+        });
+    });
+
+    const annotations = {
+        '김지아': '진단: 주요 우울 장애, 사회 불안 장애. 치료를 시도했으나 중단됨.',
+        '강남': '서울의 가장 부유하고 현대적인 지역 중 하나. 경쟁이 매우 치열한 것으로 알려져 있음.',
+        '익명': 'IP 추적 결과, 일부 계정은 동일한 장소에서 생성된 것으로 확인. 조직적 불링 가능성 있음.',
+    };
+
+    document.querySelectorAll('.page p, .page h2, .page li, .page .idcard').forEach(element => {
+        let content = element.innerHTML;
+        for (const key in annotations) {
+            const regex = new RegExp(`\\b(${key})\\b`, 'g');
+            content = content.replace(regex, `<span class="note-container">${key}<span class="note">${annotations[key]}</span></span>`);
+        }
+        element.innerHTML = content;
+    });
+
+    document.querySelectorAll('.note-container').forEach(container => {
+        const note = container.querySelector('.note');
+        container.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isNoteVisible = note.style.display === 'block';
+            document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
+            if (!isNoteVisible) {
+                note.style.display = 'block';
+            }
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.note').forEach(n => n.style.display = 'none');
+    });
+
+    const infoButton = document.getElementById('info-button');
+    const modal = document.getElementById('info-modal');
+    const closeBtn = document.querySelector('.close-btn');
+
+    infoButton.addEventListener('click', () => {
+        modal.style.display = 'flex';
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+  </script>
+</body>
+</html>
+
