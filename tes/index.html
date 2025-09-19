@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Generator Dokumen Arsip</title>
+    <style>
+      :root{
+        --ink:#e0e0e0; --ink-weak:#a9a9a9; --accent:#90b4d4; --accent-dim:#6d86a6;
+        --paper:#111827; --paper-edge:#1f2937; --paper-dark:#2a3648; --shadow:rgba(0,0,0,.5);
+      }
+      html,body{height:100%}
+      body{
+        margin:0; color:var(--ink); background:
+          radial-gradient(1200px 700px at 10% 10%, rgba(255,255,255,.02), transparent 60%),
+          radial-gradient(900px 600px at 90% 0%, rgba(255,255,255,.01), transparent 60%),
+          linear-gradient(180deg, #111827 0%, #171d2b 100%);
+        font-family: "IBM Plex Mono", "Courier New", Courier, monospace; letter-spacing:.2px;
+        overflow-x: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+        padding: 20px;
+      }
+      .container {
+        max-width: 980px; width: 100%;
+        display: flex; flex-direction: column; align-items: center;
+      }
+      .page{
+        width: 100%; padding: 38px 38px 60px; background-color: var(--paper-edge);
+        box-shadow: 0 30px 60px var(--shadow), 2px 0 0 var(--paper-dark) inset;
+        position: relative; overflow: clip; border-radius: 8px; transform-style: preserve-3d;
+        display: none;
+      }
+      .page:before{content:""; position:absolute; inset:0; pointer-events:none;
+        background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" type="fractalNoise"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .15 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>'); mix-blend-mode:multiply; opacity:.15; }
+      
+      .input-form, .loading-screen {
+        max-width: 500px;
+        width: 100%;
+        background-color: var(--paper-edge);
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      }
+      .input-form h1, .loading-screen h1 {
+        font-size: 24px; text-transform: uppercase; letter-spacing: 1.5px; text-align: center;
+      }
+      .input-form label {
+        display: block; margin-bottom: 8px; color: var(--accent);
+      }
+      .input-form input, .input-form textarea {
+        width: 100%; padding: 10px; margin-bottom: 20px;
+        background-color: #2a3648; border: 1px solid #4a7772; color: var(--ink);
+        border-radius: 4px; font-family: "IBM Plex Mono", monospace;
+      }
+      .input-form textarea { resize: vertical; min-height: 120px; }
+      .input-form button {
+        width: 100%; padding: 12px; background-color: var(--accent);
+        color: var(--paper); border: none; font-weight: bold; cursor: pointer;
+        border-radius: 4px; transition: background-color 0.3s;
+      }
+      .input-form button:disabled { background-color: #4a7772; cursor: not-allowed; }
+      .input-form button:hover:not(:disabled) { background-color: #90b4d4; }
+
+      .loading-screen {
+        display: none;
+        text-align: center;
+        flex-direction: column;
+        align-items: center;
+      }
+      #loading-spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+      .download-button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 12px 20px;
+        margin: 20px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: 'IBM Plex Mono', monospace;
+        transition: background-color 0.3s;
+        display: none;
+      }
+      .download-button:hover { background-color: #45a049; }
+
+      /* Document Styles */
+      .stamp{position:absolute; right: -18px; top: 40px; transform: rotate(12deg); border: 2px solid var(--accent-dim); color: var(--accent-dim); padding: 8px 14px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; filter: drop-shadow(0 6px 6px rgba(0,0,0,.2)); background: #2e3b50; z-index: 100; border-radius: 4px;}
+      header{display:flex; align-items:center; gap:18px; margin-bottom:14px; transform: translateZ(2px);}
+      .seal{width:64px; height:64px; border:2px solid var(--accent-dim); border-radius:50%; display:grid; place-items:center; font-weight:800; color:var(--accent-dim); box-shadow:0 0 0 3px rgba(114,215,255,.12) inset; background: #2e3b50; transform: translateZ(2px);}
+      .seal span{font-size:11px; line-height:1.1; text-align:center; letter-spacing:1.3px}
+      .title h1{margin:0; font-size:28px; letter-spacing:1.2px; text-transform:uppercase}
+      .title small{display:block; color:var(--ink-weak); margin-top:4px}
+      .ribbon{margin:16px 0 22px; padding:10px 14px; border:1px dashed var(--accent); background: repeating-linear-gradient(-45deg, #22373b, #22373b 8px, #1c3034 8px, #1c3034 16px); color:var(--accent); font-weight:700; text-transform:uppercase; display:flex; align-items:center; gap:10px; letter-spacing:1px; border-radius: 4px; transform: translateZ(1px);}
+      nav{margin: 14px 0 22px; font-size:13px; border-top:1px solid #335750; border-bottom:1px solid #335750; padding:10px 0; display:flex; gap:14px; flex-wrap:wrap; transform: translateZ(1px);}
+      nav a{color:var(--ink-weak); text-decoration:none; border-bottom:1px dotted var(--ink-weak)}
+      nav a:hover{color:var(--accent); border-color:var(--accent)}
+      h2{font-size:20px; margin:26px 0 10px; text-transform:uppercase; letter-spacing:1px; color: var(--accent);}
+      h3{font-size:16px; margin:18px 0 8px; letter-spacing:.6px; color: var(--ink-weak);}
+      p{line-height:1.6; margin:8px 0}
+      ul{margin:8px 0 8px 18px}
+      .muted{color:var(--ink-weak)}
+      .badge{font-size:11px; padding:2px 6px; border:1px solid #4a7772; margin-left:6px; color: var(--accent); border-radius: 4px;}
+      .callout{border:1px solid #4a7772; padding:12px 14px; background:#1c3034; margin:12px 0; border-radius: 4px;}
+      .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+      .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px}
+      @media (max-width: 920px){.grid,.grid-3{grid-template-columns:1fr}}
+      .idcard{border:1px solid #4a7772; padding:10px 12px; background:#1c3034; border-radius: 4px;}
+      .idcard b{display:block; font-size:14px; color: var(--accent)}
+      .log{background:#0a0e16; color:#a9a9a9; border:1px solid #2a3648; padding:12px; font-size:13px; box-shadow:0 10px 20px rgba(0,0,0,.25) inset; border-radius: 4px;}
+      .log .green{color:#7fd77f} .log .red{color:#ff7b70} .log .amber{color:#e0c46b}
+      .timeline{border-left:3px solid #6d86a6; margin:10px 0 10px 6px; padding-left:14px; position:relative;}
+      .timeline-container { position: relative; }
+      .timeline-line {
+        position: absolute;
+        top: 0;
+        left: 6px;
+        width: 3px;
+        height: 100%;
+        background-color: #6d86a6;
+        transition: background-color 0.5s linear;
+      }
+      .timeline .t{margin:12px 0; position:relative; padding-left:20px; color: var(--ink-weak); transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);}
+      .timeline .t.active { color: var(--ink); }
+      .timeline .t:before{content:''; position:absolute; left:-18px; top:50%; transform:translateY(-50%) scale(0); width:12px; height:12px; background:#1c3034; border:2px solid; border-radius:50%; transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), background-color 0.4s ease-in-out, border-color 0.4s ease-in-out;}
+      .timeline .t.active:before { transform: translateY(-50%) scale(1.3); }
+      .timeline .t b{display:inline-block; width:150px; color: var(--accent)}
+      .animated-section { opacity: 0; transform: translateY(20px) scale(0.98); transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+      .animated-section.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+      footer{margin-top:40px; padding-top:12px; border-top:1px solid #335750; font-size:12px; color:var(--ink-weak); transform: translateZ(1px);}
+      @keyframes blink { 50%{opacity:.1} }
+      .cursor{display:inline-block; width:8px; background:#e0e0e0; animation: blink .9s step-end infinite}
+      .note-container {
+        position: relative; display: inline-block; cursor: pointer; border-bottom: 1px dotted var(--ink-weak);
+      }
+      .note {
+        display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+        background: #2a3648; border: 1px solid #4a7772; padding: 8px; width: 250px;
+        font-size: 12px; color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,.25);
+        z-index: 50; animation: fadeIn 0.3s ease-out; border-radius: 4px;
+      }
+      .note::after {
+        content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg);
+        width: 10px; height: 10px; background: #2a3648; border-right: 1px solid #4a7772;
+        border-bottom: 1px solid #4a7772; z-index: 49;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+      }
+    </style>
+</head>
+<body>
+    <div class="container">
+      <div class="input-form" id="inputForm">
+        <h1>Generator Dokumen Arsip</h1>
+        <label for="apiKey">Kunci API Gemini:</label>
+        <input type="text" id="apiKey" placeholder="Masukkan kunci API Anda">
+        <label for="prompt">Deskripsi Cerita:</label>
+        <textarea id="prompt" placeholder="Misalnya: Sebuah cerita detektif fiksi ilmiah tentang sebuah kasus di kota yang tenggelam."></textarea>
+        <button id="generateBtn">Buat Dokumen</button>
+      </div>
+
+      <div class="loading-screen" id="loadingScreen">
+        <h1>Membuat Cerita...</h1>
+        <div id="loading-spinner"></div>
+        <p>Mohon tunggu sebentar. Proses ini bisa memakan waktu.</p>
+      </div>
+      
+      <button id="downloadBtn" class="download-button">Unduh Dokumen</button>
+
+      <main class="page" id="storyDocument" role="document">
+        <!-- Generated Content will be injected here -->
+      </main>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const inputForm = document.getElementById('inputForm');
+        const apiKeyInput = document.getElementById('apiKey');
+        const promptInput = document.getElementById('prompt');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const storyDocument = document.getElementById('storyDocument');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Load API Key from local storage
+        const savedApiKey = localStorage.getItem('geminiApiKey');
+        if (savedApiKey) {
+          apiKeyInput.value = savedApiKey;
+        }
+
+        // Enable button when inputs are filled
+        function checkInputs() {
+          generateBtn.disabled = !apiKeyInput.value || !promptInput.value;
+        }
+        apiKeyInput.addEventListener('input', checkInputs);
+        promptInput.addEventListener('input', checkInputs);
+        checkInputs();
+
+        // Handle generation button click
+        generateBtn.addEventListener('click', async () => {
+          const apiKey = apiKeyInput.value;
+          const prompt = promptInput.value;
+          localStorage.setItem('geminiApiKey', apiKey);
+
+          inputForm.style.display = 'none';
+          loadingScreen.style.display = 'flex';
+          storyDocument.style.display = 'none';
+          downloadBtn.style.display = 'none';
+
+          try {
+            const storyData = await generateStory(prompt, apiKey);
+            renderDocument(storyData);
+            storyDocument.style.display = 'block';
+            downloadBtn.style.display = 'block';
+          } catch (error) {
+            alert('Terjadi kesalahan: ' + error.message);
+            inputForm.style.display = 'block';
+            storyDocument.style.display = 'none';
+            downloadBtn.style.display = 'none';
+          } finally {
+            loadingScreen.style.display = 'none';
+          }
+        });
+
+        // Generate story from Gemini API
+        async function generateStory(userPrompt, apiKey) {
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+          
+          const systemInstruction = `
+            Anda adalah penulis cerita yang ahli dalam membuat dokumen fiksi ilmiah dan misteri dengan format arsip.
+            Tugas Anda adalah membuat cerita berdasarkan deskripsi pengguna. Hasilnya harus dalam format JSON yang ketat.
+            Pastikan kontennya terperinci dan kreatif. Isi setiap bagian harus ditulis seolah-olah itu adalah dokumen investigasi atau arsip sungguhan.
+            
+            Berikut adalah skema JSON yang harus Anda ikuti:
+            
+            {
+              "title": "Judul Cerita",
+              "subtitle": "Subjudul cerita",
+              "summary": {
+                "title": "Ringkasan",
+                "content": "Isi ringkasan ceritanya."
+              },
+              "mainCharacter": {
+                "title": "Pemeran Utama",
+                "name": "Nama Karakter",
+                "details": "Detail karakter, misalnya: Profesi, latar belakang, dan sifat."
+              },
+              "timeline": {
+                "title": "Garis Waktu",
+                "events": [
+                  {
+                    "date": "Tanggal/Waktu",
+                    "description": "Deskripsi singkat dari peristiwa tersebut."
+                  }
+                ]
+              },
+              "evidence": {
+                "title": "Bukti",
+                "callout": "Ringkasan temuan utama.",
+                "log1": {
+                  "title": "Judul Bukti 1",
+                  "content": "Isi bukti 1."
+                },
+                "log2": {
+                  "title": "Judul Bukti 2",
+                  "content": "Isi bukti 2."
+                }
+              },
+              "analysis": {
+                "title": "Analisis",
+                "content": "Analisis mendalam tentang cerita."
+              },
+              "impact": {
+                "title": "Dampak",
+                "points": [
+                  "Poin dampak 1.",
+                  "Poin dampak 2.",
+                  "Poin dampak 3."
+                ]
+              },
+              "faq": {
+                "title": "FAQ",
+                "questions": [
+                  {
+                    "question": "Pertanyaan yang Sering Diajukan?",
+                    "answer": "Jawaban atas pertanyaan tersebut."
+                  }
+                ]
+              },
+              "advice": {
+                "title": "Saran",
+                "content": "Pesan penutup atau saran moral dari cerita tersebut."
+              }
+            }
+            
+            Jangan berikan teks tambahan atau penjelasan di luar objek JSON. Pastikan JSON yang Anda hasilkan valid.
+          `;
+
+          const payload = {
+            contents: [{ parts: [{ text: `Buat cerita fiksi ilmiah/misteri berdasarkan deskripsi berikut: ${userPrompt}` }] }],
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            generationConfig: {
+              responseMimeType: "application/json"
+            }
+          };
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error.message || 'Gagal terhubung dengan API Gemini.');
+          }
+
+          const result = await response.json();
+          const jsonString = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          
+          if (!jsonString) {
+            throw new Error('Respons API tidak valid atau kosong.');
+          }
+
+          try {
+            return JSON.parse(jsonString);
+          } catch (e) {
+            console.error('Failed to parse JSON:', e);
+            console.error('Raw JSON string:', jsonString);
+            throw new Error('Gagal memproses cerita yang dihasilkan. Coba lagi.');
+          }
+        }
+
+        // Render document from JSON data
+        function renderDocument(data) {
+          const documentHtml = `
+            <div class="stamp" aria-label="Arsip">
+              ARSIP
+            </div>
+            <header>
+              <div class="seal" aria-hidden="true">
+                <span>DIVISI<br>
+                ANALISIS<br>
+                ARSIP</span>
+              </div>
+              <div class="title">
+                <h1>${data.title}</h1>
+                <small>${data.subtitle}</small>
+              </div>
+            </header>
+            <div class="ribbon">
+              DOKUMEN KLASIFIKASI—Sangat Rahasia
+            </div>
+            <nav aria-label="Bagian">
+              <a href="#summary">Ringkasan</a>
+              <a href="#character">Pemeran Utama</a>
+              <a href="#timeline">Garis Waktu</a>
+              <a href="#evidence">Bukti</a>
+              <a href="#analysis">Analisis</a>
+              <a href="#impact">Dampak</a>
+              <a href="#faq">FAQ</a>
+              <a href="#advice">Saran</a>
+            </nav>
+            <section id="summary" class="animated-section">
+              <h2>${data.summary.title}</h2>
+              <p>${data.summary.content}</p>
+            </section>
+            <section id="character" class="animated-section">
+              <h2>${data.mainCharacter.title} <span class="badge">PROFIL</span></h2>
+              <div class="idcard">
+                <b>${data.mainCharacter.name}</b><br>
+                ${data.mainCharacter.details}
+              </div>
+            </section>
+            <section id="timeline" class="animated-section">
+              <h2>${data.timeline.title}</h2>
+              <div class="timeline-container">
+                <div class="timeline-line"></div>
+                <div class="timeline">
+                  ${data.timeline.events.map(event => `<div class="t"><b>${event.date}</b>${event.description}</div>`).join('')}
+                </div>
+              </div>
+            </section>
+            <section id="evidence" class="animated-section">
+              <h2>${data.evidence.title}</h2>
+              <div class="grid">
+                <div>
+                  <h3>${data.evidence.log1.title}</h3>
+                  <div class="log" role="log" aria-live="polite">
+                    ${data.evidence.log1.content.split('\n').map(line => `<span>${line}</span>`).join('<br>')}
+                    <span class="cursor">&nbsp;</span>
+                  </div>
+                </div>
+                <div>
+                  <h3>${data.evidence.log2.title}</h3>
+                  <div class="log" role="log" aria-live="polite">
+                    ${data.evidence.log2.content.split('\n').map(line => `<span>${line}</span>`).join('<br>')}
+                    <span class="cursor">&nbsp;</span>
+                  </div>
+                </div>
+              </div>
+              <div class="callout">
+                <b>Catatan:</b> ${data.evidence.callout}
+              </div>
+            </section>
+            <section id="analysis" class="animated-section">
+              <h2>${data.analysis.title}</h2>
+              <p>${data.analysis.content}</p>
+            </section>
+            <section id="impact" class="animated-section">
+              <h2>${data.impact.title}</h2>
+              <ul>
+                ${data.impact.points.map(point => `<li>${point}</li>`).join('')}
+              </ul>
+            </section>
+            <section id="faq" class="animated-section">
+              <h2>${data.faq.title}</h2>
+              <ul>
+                ${data.faq.questions.map(q => `<li><b>${q.question}</b><br>${q.answer}</li>`).join('')}
+              </ul>
+            </section>
+            <section id="advice" class="animated-section">
+              <h2>${data.advice.title}</h2>
+              <p>${data.advice.content}</p>
+            </section>
+            <footer>
+              <div>
+                Arsip &mdash; Dokumen Resmi
+              </div>
+            </footer>
+          `;
+          storyDocument.innerHTML = documentHtml;
+        }
+
+        // Handle download button click
+        downloadBtn.addEventListener('click', () => {
+          const docContent = document.getElementById('storyDocument').innerHTML;
+          const fullHtml = `
+            <!DOCTYPE html>
+            <html lang="id">
+            <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Dokumen Arsip</title>
+                <style>
+                  :root{
+                    --ink:#e0e0e0; --ink-weak:#a9a9a9; --accent:#90b4d4; --accent-dim:#6d86a6;
+                    --paper:#111827; --paper-edge:#1f2937; --paper-dark:#2a3648; --shadow:rgba(0,0,0,.5);
+                  }
+                  body{
+                    margin:0; color:var(--ink); background:
+                      radial-gradient(1200px 700px at 10% 10%, rgba(255,255,255,.02), transparent 60%),
+                      radial-gradient(900px 600px at 90% 0%, rgba(255,255,255,.01), transparent 60%),
+                      linear-gradient(180deg, #111827 0%, #171d2b 100%);
+                    font-family: "IBM Plex Mono", "Courier New", Courier, monospace; letter-spacing:.2px;
+                    padding: 40px;
+                  }
+                  .page{ max-width: 980px; margin: 0 auto; padding: 38px 38px 60px; background-color: var(--paper-edge);
+                    box-shadow: 0 30px 60px var(--shadow), 2px 0 0 var(--paper-dark) inset;
+                    position: relative; border-radius: 8px;}
+                  .page:before{content:""; position:absolute; inset:0; pointer-events:none;
+                    background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><filter id="n"><feTurbulence baseFrequency="0.9" numOctaves="2" type="fractalNoise"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .15 0"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>'); mix-blend-mode:multiply; opacity:.15; }
+                  .stamp{position:absolute; right: -18px; top: 40px; transform: rotate(12deg); border: 2px solid var(--accent-dim); color: var(--accent-dim); padding: 8px 14px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; filter: drop-shadow(0 6px 6px rgba(0,0,0,.2)); background: #2e3b50; z-index: 100; border-radius: 4px;}
+                  header{display:flex; align-items:center; gap:18px; margin-bottom:14px;}
+                  .seal{width:64px; height:64px; border:2px solid var(--accent-dim); border-radius:50%; display:grid; place-items:center; font-weight:800; color:var(--accent-dim); box-shadow:0 0 0 3px rgba(114,215,255,.12) inset; background: #2e3b50;}
+                  .seal span{font-size:11px; line-height:1.1; text-align:center; letter-spacing:1.3px}
+                  .title h1{margin:0; font-size:28px; letter-spacing:1.2px; text-transform:uppercase}
+                  .title small{display:block; color:var(--ink-weak); margin-top:4px}
+                  .ribbon{margin:16px 0 22px; padding:10px 14px; border:1px dashed var(--accent); background: repeating-linear-gradient(-45deg, #22373b, #22373b 8px, #1c3034 8px, #1c3034 16px); color:var(--accent); font-weight:700; text-transform:uppercase; display:flex; align-items:center; gap:10px; letter-spacing:1px; border-radius: 4px;}
+                  nav{display:none;}
+                  h2{font-size:20px; margin:26px 0 10px; text-transform:uppercase; letter-spacing:1px; color: var(--accent);}
+                  h3{font-size:16px; margin:18px 0 8px; letter-spacing:.6px; color: var(--ink-weak);}
+                  p{line-height:1.6; margin:8px 0}
+                  ul{margin:8px 0 8px 18px}
+                  .muted{color:var(--ink-weak)}
+                  .badge{font-size:11px; padding:2px 6px; border:1px solid #4a7772; margin-left:6px; color: var(--accent); border-radius: 4px;}
+                  .callout{border:1px solid #4a7772; padding:12px 14px; background:#1c3034; margin:12px 0; border-radius: 4px;}
+                  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+                  .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px}
+                  @media (max-width: 920px){.grid,.grid-3{grid-template-columns:1fr}}
+                  .idcard{border:1px solid #4a7772; padding:10px 12px; background:#1c3034; border-radius: 4px;}
+                  .idcard b{display:block; font-size:14px; color: var(--accent)}
+                  .log{background:#0a0e16; color:#a9a9a9; border:1px solid #2a3648; padding:12px; font-size:13px; box-shadow:0 10px 20px rgba(0,0,0,.25) inset; border-radius: 4px;}
+                  .log .green{color:#7fd77f} .log .red{color:#ff7b70} .log .amber{color:#e0c46b}
+                  .timeline{border-left:3px solid #6d86a6; margin:10px 0 10px 6px; padding-left:14px; position:relative;}
+                  .timeline-container { position: relative; }
+                  .timeline-line {
+                    position: absolute; top: 0; left: 6px; width: 3px; height: 100%;
+                    background-color: #6d86a6;
+                  }
+                  .timeline .t{margin:12px 0; position:relative; padding-left:20px; color: var(--ink-weak);}
+                  .timeline .t:before{content:''; position:absolute; left:-18px; top:50%; transform:translateY(-50%); width:12px; height:12px; background:#1c3034; border:2px solid; border-radius:50%;}
+                  .cursor{display:none;}
+                  footer{margin-top:40px; padding-top:12px; border-top:1px solid #335750; font-size:12px; color:var(--ink-weak);}
+                </style>
+            </head>
+            <body>
+              <main class="page">
+                ${docContent}
+              </main>
+            </body>
+            </html>
+          `;
+          const blob = new Blob([fullHtml], { type: 'text/html' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Dokumen_Arsip.html`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+      });
+    </script>
+</body>
+</html>
+
