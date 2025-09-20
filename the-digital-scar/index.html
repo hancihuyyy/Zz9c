@@ -211,7 +211,74 @@
         background: var(--accent);
         transition: width 0.1s linear;
       }
-    </style>
+    
+      
+      .glitch-text {
+        font-size: 0.9em;
+        color: var(--ink-weak);
+        margin-top: 22px;
+        position: relative;
+        text-align: center;
+        max-width: 90vw;
+        animation: glitch-fade 4s infinite;
+        text-shadow: 0 0 2px #90b4d4, 0 0 4px rgba(144,180,212,0.5);
+      }
+      @keyframes glitch-fade {
+        0%, 100% { opacity: 1; transform: none; }
+        45% { opacity: 0.5; transform: scale(1.02) skew(0.5deg); }
+        55% { opacity: 0.5; transform: scale(1.02) skew(-0.5deg); }
+      }
+
+        50% { opacity: 0.45; transform: skew(0.4deg); }
+      }
+
+
+      .timeline .t.dim { opacity: .35; filter: saturate(70%); transition: opacity .25s ease; }
+      .timeline-line.highlight { box-shadow: 0 0 10px rgba(144,180,212,0.6), 0 0 22px rgba(144,180,212,0.35); }
+
+
+      /* Interactive timeline hover enhancements */
+      .timeline .t { transition: opacity .25s ease, transform .25s ease; }
+      .timeline .t.dim { opacity: .35; filter: saturate(75%); }
+      .timeline .t.active-hover { transform: scale(1.01); }
+      .timeline-line.highlight { box-shadow: 0 0 12px rgba(144,180,212,0.7), 0 0 28px rgba(144,180,212,0.35); transition: box-shadow .25s ease; }
+
+
+      .like-btn{
+        background: transparent;
+        border: 1px solid #4a7772;
+        color: var(--ink);
+        padding: 2px 8px;
+        border-radius: 14px;
+        cursor: pointer;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 13px;
+      }
+      .like-btn[aria-pressed="true"]{
+        background: rgba(144,180,212,0.15);
+        box-shadow: 0 0 6px rgba(144,180,212,0.25) inset;
+      }
+
+
+      /* Like bump animation */
+      .like-bump {
+        animation: like-bump 200ms ease-out;
+      }
+      @keyframes like-bump {
+        0%   { transform: scale(1);   }
+        50%  { transform: scale(1.15); }
+        100% { transform: scale(1);   }
+      }
+      #like-count.bump {
+        animation: count-flash 220ms ease-out;
+      }
+      @keyframes count-flash {
+        0% { filter: brightness(1); }
+        50% { filter: brightness(1.6); }
+        100% { filter: brightness(1); }
+      }
+
+</style>
 </head>
 <body>
   <div id="loading-screen">
@@ -219,6 +286,12 @@
       <div class="loading-bar-container">
           <div id="loading-bar" class="loading-bar"></div>
       </div>
+                  <div class="glitch-text">
+        Silakan gunakan fitur terjemahan browser untuk pengalaman membaca terbaik.<br>
+        <span class="glitch-sub">Tulisan ini dibuat agar kamu tetap membaca cerita sampai tuntas. Mohon jangan meniru atau melakukan tindakan yang membahayakan diri sendiri maupun orang lain.</span>
+      </div>
+
+
   </div>
 
   <main class="page" role="document">
@@ -349,15 +422,15 @@
           </div>
         </div>
         <div>
-          <h3>친구들에게 보낸 마지막 메시지 기록</h3>
+          <h3>친구들이 피해자에게 보낸 마지막 메시지 기록</h3>
           <div class="log" role="log" aria-live="polite">
-            <span class="muted">2018.06.04 | 23:50 | 김하나:</span>
-            지아야, 괜찮아? 왜 전화 안 받아?
-            <br><span class="muted">2018.06.04 | 23:55 | 박민지:</span>
+            <span class="muted">2018.06.04 | 23:53 | 김하나:</span>
+            지아야, 괜찮아? 왜 네 전화 안 받아?
+            <br><span class="muted">2018.06.04 | 23:59 | 박민지:</span>
             지아야! 마지막 글... 무슨 말인지 모르겠어. 제발 답장해줘.
-            <br><span class="muted">2018.06.05 | 01:05 | 이준호:</span>
+            <br><span class="muted">2018.06.05 | 01:12 | 이준호:</span>
             야, 김지아! 갑자기 왜 글 다 지웠냐? 뭔 일 있어?
-            <br><span class="muted">2018.06.05 | 01:20 | 김하나:</span>
+            <br><span class="muted">2018.06.05 | 01:23 | 김하나:</span>
             지아야, 너무 걱정돼. 경찰에 신고할까?
             <span class="cursor">&nbsp;</span>
           </div>
@@ -374,8 +447,8 @@
       </p>
       <div class="social-post">
           <div class="social-header">
-              <div class="avatar" style="background-image: url('https://i.ibb.co.com/57PYfNh/1.png');"></div>
-              <span class="username">김지아</span>
+              <div class="avatar" style="background-image: url('https://i.ibb.co.com/YFD8X60c/2a5290f5-1e27-4ca3-9bc7-075ae8008d76.jpg');"></div>
+              <span class="username">외로운_개미</span>
               <span class="timestamp">2018년 5월 28일</span>
           </div>
           <div class="post-content">
@@ -384,44 +457,48 @@
               </p>
           </div>
           <div class="post-meta">
-              <span>7 좋아요</span>
-              <span>5 댓글</span>
+              <button class="like-btn" aria-pressed="false">❤️ <span id="like-count">7</span> 좋아요</button>
+              <span>💬 5 댓글</span>
           </div>
+          
           <div class="comments-section">
               <div class="comment">
                   <div>
-                      <span class="comment-user">사랑_가득</span>
+                      <span class="comment-user">이칸사바르_볼루</span>
                       <span class="comment-text">괜찮을 거예요, 힘내세요. 힘든 일은 지나갈 거예요. :)</span>
                   </div>
               </div>
               <div class="comment">
                   <div>
-                      <span class="comment-user">악마의_눈빛21</span>
+                      <span class="comment-user">미친_여덟_gg</span>
                       <span class="comment-text">솔직히 니 글 다 똑같아. 맨날 슬픈 척, 감성적인 척. 토나와.</span>
                   </div>
               </div>
               <div class="comment">
                 <div>
-                    <span class="comment-user">악마의_눈빛21</span>
+                    <span class="comment-user">미친_여덟_gg</span>
                     <span class="comment-text">니 글이 얼마나 유치한지나 알아? 인생 바닥이면서 있는 척은.</span>
                 </div>
               </div>
               <div class="comment">
                 <div>
-                    <span class="comment-user">악마의_눈빛21</span>
-                    <span class="comment-text">@사랑_가득 너도 모르는 사람인데 왜 위로해주냐 ㅋㅋㅋㅋㅋㅋ 웃기네.</span>
+                    <span class="comment-user">Crazy_eight_gg</span>
+                    <span class="comment-text">@Ikansavar_Bolu Kamu bahkan tidak kenal siapa pun, jadi kenapa kamu menghiburnya? ㅋㅋㅋㅋㅋㅋ Lucu sekali.</span>
                 </div>
               </div>
-               <div class="comment">
+              <div class="comment">
                 <div>
-                    <span class="comment-user">악마의_눈빛21</span>
-                    <span class="comment-text">ㅋㅋ 내가 진짜 너 같은 애들 보면 웃음밖에 안 나온다. 얼른 자살이나 해.</span>
+                    <span class="comment-user">미친_여덟_gg</span>
+                    <span class="comment-text">…그리고 아무도 너를 진짜로 신경 쓰지 않아.</span>
                 </div>
               </div>
           </div>
+
+        </div>
+      </div>
       </div>
       <div class="callout">
-        <b>분석 의견:</b> '악마의_눈빛21' 계정은 피해자의 여러 게시물에 대해 지속적으로 모욕과 비난을 한 것으로 확인되었다. 그의 댓글은 특히 피해자의 감정적 약점을 공격하여 정신적 고통을 가중시켰다. FBI 분석에 따르면 이 계정은 다른 게시물에서도 유사한 공격적 댓글 이력이 있다.
+        <b>분석 의견:</b> '미친_여덟_gg' 계정은 피해자의 여러 게시물에 대해 지속적으로 모욕과 비난을 한 것으로 확인되었다. 그의 댓글은 특히 피해자의 감정적 약점을 공격하여 정신적 고통을 가중시켰다. FBI 분석에 따르면 이 계정은 다른 게시물에서도 유사한 공격적 댓글 이력이 있다.
       </div>
     </section>
     <section id="analysis" class="animated-section">
@@ -441,7 +518,7 @@
         <p>사건에 대한 더 깊은 통찰을 얻기 위해 전문가들을 인터뷰했습니다. 다음은 인터뷰의 일부 발췌 내용입니다.</p>
 
         <div class="callout">
-            <h3>박민준 박사, 청소년 심리학자</h3>
+            <h3>서윤재 박사, 청소년 심리학자</h3>
             <p class="interview-q">"온라인 환경이 김지아와 같은 청소년들의 정신 건강에 어떻게 영향을 미치나요?"</p>
             <p class="interview-a">
                 "소외감을 느끼는 청소년들에게 온라인 공간은 피난처이자 자신을 표현할 수 있는 유일한 공간이 될 수 있습니다. 그러나 그 공간마저 혐오와 불링으로 가득 차면 그 효과는 파괴적입니다. 김지아는 유일한 표현 수단을 잃었을 뿐만 아니라, 끊임없는 공격으로 인해 자신의 존재 가치를 부정당했습니다."
@@ -453,7 +530,7 @@
         </div>
 
         <div class="callout">
-            <h3>이지훈, 사이버 법률 전문가</h3>
+            <h3>강도현 변호사, 사이버 법률 전문가</h3>
             <p class="interview-q">"익명으로 이루어진 사이버 범죄는 왜 기소하기 어려운가요?"</p>
             <p class="interview-a">
                 "법적으로 표현의 자유는 어느 정도까지 온라인 익명성을 보장합니다. 그러나 그것이 협박, 명예훼손, 또는 조직적인 괴롭힘으로 변질되면 조치를 취할 수 있습니다. 주요 어려움은 다양한 플랫폼에서 강력한 디지털 증거를 수집하고, 관련 IP 주소를 추적하기 위해 서비스 제공자들과 협력하는 것입니다. 이는 어렵지만 불가능하지는 않습니다."
@@ -577,6 +654,7 @@
                 loadingBar.style.width = '100%';
                 setTimeout(() => {
                     loadingScreen.classList.add('fade-out');
+const gt = document.querySelector('.glitch-text'); if (gt) gt.style.display = 'none';
                     document.body.classList.remove('no-scroll');
                 }, 500);
             } else {
@@ -637,6 +715,22 @@
 
         sections.forEach(section => sectionObserver.observe(section));
         timelinePoints.forEach((point, index) => {
+        // Hover-driven highlight: glow the line and dim other events
+        point.addEventListener('mouseenter', () => {
+          const c = point.getAttribute('data-color') || '#6d86a6';
+          timelineLine.style.backgroundColor = c;
+          timelineLine.classList.add('highlight');
+          timelinePoints.forEach(p => { if (p !== point) p.classList.add('dim'); });
+        });
+        point.addEventListener('mouseleave', () => {
+          timelineLine.classList.remove('highlight');
+          timelinePoints.forEach(p => p.classList.remove('dim'));
+          // Restore line color to the currently active point if any
+          const active = Array.from(timelinePoints).find(p => p.classList.contains('active'));
+          const rc = active ? (active.getAttribute('data-color') || '#6d86a6') : '#6d86a6';
+          timelineLine.style.backgroundColor = rc;
+        });
+
           point.style.borderColor = pointColors[index];
           point.querySelector('b').style.color = pointColors[index];
           timelineObserver.observe(point);
@@ -698,6 +792,31 @@
                 infoMessage.classList.toggle('visible');
             }
         });
+    
+        // Like toggle 7 <-> 8
+        const likeBtn = document.querySelector('.like-btn');
+        const likeCountEl = document.getElementById('like-count');
+        if (likeBtn) {
+          likeBtn.addEventListener('click', () => {
+            const countEl = document.getElementById('like-count');
+            if (!countEl) return;
+            const current = parseInt(countEl.textContent.trim(), 10);
+            const next = (current === 7) ? 8 : 7;
+            countEl.textContent = String(next);
+            
+            likeBtn.classList.remove('like-bump');
+            void likeBtn.offsetWidth; // reflow to restart animation
+            likeBtn.classList.add('like-bump');
+            likeCountEl.classList.remove('bum p'); // cleanup typo safety
+            likeCountEl.classList.remove('bump');
+            void likeCountEl.offsetWidth;
+            likeCountEl.classList.add('bump');
+
+            const pressed = likeBtn.getAttribute('aria-pressed') === 'true';
+            likeBtn.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+          });
+        }
+
     });
   </script>
 </body>
