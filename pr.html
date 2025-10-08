@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Panel HTML Previewer</title>
+    <!-- Memuat Tailwind CSS untuk styling modern dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter */
+        html { font-family: 'Inter', sans-serif; }
+
+        /* Style dasar untuk Iframe */
+        .preview-iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 250px; /* Tinggi minimum untuk mobile */
+            border: none;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+
+        /* Style untuk mode fullscreen/perbesar - Memastikan tata letak tetap responsif */
+        #preview-area.is-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            padding: 1rem;
+            z-index: 50; /* Di atas elemen lain */
+            background-color: #1f2937; /* Background gelap saat fullscreen */
+            transition: all 0.5s ease-in-out;
+            /* Atur grid untuk mode fullscreen agar panel memenuhi ruang */
+            grid-template-columns: repeat(2, 1fr) !important; /* Selalu 2 kolom di desktop/tablet */
+        }
+
+        /* Style untuk border pratinjau */
+        .preview-card {
+            border: 2px solid #4b5563; /* Border abu-abu gelap */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            background-color: #374151; /* Warna kartu gelap */
+            /* Mengatur tinggi minimum dan memastikan iframe mengisi */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-card > iframe {
+            flex-grow: 1; /* Iframe mengisi sisa ruang */
+        }
+        
+        /* Menyembunyikan elemen lain saat mode zoom individu aktif */
+        .hidden-during-zoom {
+            display: none !important;
+        }
+
+
+        /* Responsive height control for better viewing experience on larger screens */
+        @media (min-width: 1024px) {
+            .lg\:h-custom-grid {
+                height: calc(50vh - 4.5rem); /* Tinggi sekitar setengah viewport dikurangi padding/margin */
+            }
+            #preview-area.is-fullscreen .preview-card {
+                height: calc(50vh - 2rem);
+            }
+        }
+    </style>
+    <script>
+        // Konfigurasi Tailwind untuk warna dan font
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#10b981',
+                        'dark-bg': '#1f2937',
+                        'card-bg': '#374151',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-dark-bg text-gray-100 min-h-screen p-4 sm:p-8">
+
+    <header class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-primary">Pratinjau Kode HTML Multi-Panel</h1>
+        <p class="mt-2 text-gray-400">Pilih jumlah panel dan beri nama pratinjau Anda.</p>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        
+        <!-- Kontrol Utama: Pilih Jumlah Panel & Aksi Global -->
+        <section class="mb-8 p-4 bg-card-bg rounded-xl shadow-lg flex flex-col items-center justify-between space-y-4">
+            
+            <!-- Baris 1: Kontrol Jumlah Panel & Fullscreen -->
+            <div class="flex flex-col md:flex-row items-center justify-between w-full space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex items-center space-x-4 w-full md:w-auto justify-center md:justify-start">
+                    <label for="preview-count" class="font-semibold text-lg whitespace-nowrap">Jumlah Panel:</label>
+                    <select id="preview-count" class="bg-gray-700 text-white p-2 rounded-md shadow focus:ring-primary focus:border-primary" onchange="initializeUI()">
+                        <option value="1">1 Preview (Default)</option>
+                        <option value="2">2 Preview</option>
+                        <option value="3">3 Preview</option>
+                        <option value="4">4 Preview (Maks)</option>
+                    </select>
+                </div>
+
+                <button id="fullscreen-toggle" onclick="toggleFullScreen()" class="w-full md:w-auto bg-primary hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                    <span id="fullscreen-text">Mode Perbesar Semua</span>
+                </button>
+            </div>
+            
+            <!-- Baris 2: Tombol Refresh Semua (di tengah) -->
+            <div class="w-full flex justify-center pt-2 border-t border-gray-700 mt-4">
+                <button onclick="refreshAllPreviews()" class="w-full md:w-1/2 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.176 10a2.5 2.5 0 01-1.4 1.4A2.5 2.5 0 0118.01 20.91a2.5 2.5 0 01-1.4-1.4m-12.87 0a8.002 8.002 0 01-.06-11.233L10 9m0 0l4.5 4.5m-4.5-4.5v5m-5-5l-4.5 4.5"></path></svg>
+                    <span>Refresh Semua Pratinjau</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Area Unggahan File -->
+        <section id="upload-area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></section>
+
+        <!-- Area Pratinjau (Iframe) -->
+        <section id="preview-area" class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 bg-gray-800 rounded-xl transition-all duration-500"></section>
+
+    </main>
+
+    <script>
+        // Variabel global untuk elemen DOM dan data yang dimuat
+        const previewCountSelect = document.getElementById('preview-count');
+        const uploadArea = document.getElementById('upload-area');
+        const previewArea = document.getElementById('preview-area');
+        const fullscreenText = document.getElementById('fullscreen-text');
+        
+        // Simpan konten HTML yang sudah dimuat untuk refresh
+        const loadedHtmlContents = {}; 
+        
+        // --- LOGIKA UTAMA ---
+
+        /**
+         * Menginisialisasi UI berdasarkan jumlah panel yang dipilih.
+         */
+        function initializeUI() {
+            const count = parseInt(previewCountSelect.value, 10);
+            
+            // 1. Bersihkan area sebelumnya
+            uploadArea.innerHTML = '';
+            previewArea.innerHTML = '';
+            
+            // 2. Atur tata letak area pratinjau (tetap 2 kolom di desktop, 1 di mobile)
+            previewArea.className = `grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 bg-gray-800 rounded-xl transition-all duration-500`;
+
+            // 3. Buat input file dan iframe untuk setiap panel
+            for (let i = 1; i <= 4; i++) {
+                const isVisible = i <= count;
+                const defaultTitle = loadedHtmlContents[i] ? loadedHtmlContents[i].title : `Preview #${i}`;
+
+                // Buat Input File dan Title Input
+                const fileInputContainer = document.createElement('div');
+                fileInputContainer.id = `upload-slot-${i}`;
+                fileInputContainer.className = `p-3 bg-card-bg rounded-lg border border-gray-600 shadow-md ${isVisible ? '' : 'hidden'}`;
+                fileInputContainer.innerHTML = `
+                    <label for="title-input-${i}" class="block text-sm font-medium text-gray-300 mb-1">
+                        Nama Pratinjau ${i}:
+                    </label>
+                    <input type="text" id="title-input-${i}" placeholder="${defaultTitle}" 
+                           value="${defaultTitle.startsWith('Preview #') ? '' : defaultTitle}"
+                           oninput="updatePreviewTitle(${i}, this.value)"
+                           class="w-full mb-3 p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:border-primary focus:ring-primary">
+                    
+                    <label for="file-input-${i}" class="block text-sm font-medium text-gray-300 mb-2">
+                        Upload File HTML:
+                    </label>
+                    <input type="file" id="file-input-${i}" accept=".html" 
+                           class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 
+                                  file:rounded-full file:border-0 file:text-sm file:font-semibold 
+                                  file:bg-primary file:text-white hover:file:bg-indigo-600 cursor-pointer" 
+                           onchange="handleFileUpload(event, ${i})">
+                `;
+                uploadArea.appendChild(fileInputContainer);
+
+                // Buat Iframe Preview Card
+                const previewCard = document.createElement('div');
+                previewCard.id = `preview-card-${i}`;
+                previewCard.className = `preview-card ${isVisible ? '' : 'hidden'} lg:h-custom-grid`; 
+                previewCard.innerHTML = `
+                    <div class="p-2 bg-gray-700 text-sm font-semibold border-b border-gray-600 flex justify-between items-center">
+                        <span id="preview-title-${i}">${defaultTitle}</span>
+                        <button onclick="zoomSinglePreview(${i})" class="text-xs text-secondary hover:text-emerald-400 transition-colors">
+                            <span id="zoom-text-${i}">Perbesar</span>
+                        </button>
+                    </div>
+                    <iframe id="preview-${i}" class="preview-iframe" title="${defaultTitle}"></iframe>
+                `;
+                previewArea.appendChild(previewCard);
+                
+                // Muat ulang konten jika sudah ada
+                if (loadedHtmlContents[i] && loadedHtmlContents[i].content) {
+                    renderHtmlContent(loadedHtmlContents[i].content, i);
+                }
+            }
+
+            // Set default fullscreen mode off
+            previewArea.classList.remove('is-fullscreen');
+            fullscreenText.textContent = 'Mode Perbesar Semua';
+        }
+
+        /**
+         * Memperbarui judul pratinjau di panel dan data yang dimuat.
+         * @param {number} id ID pratinjau.
+         * @param {string} newTitle Judul baru dari input.
+         */
+        function updatePreviewTitle(id, newTitle) {
+            const titleElement = document.getElementById(`preview-title-${id}`);
+            const titleToDisplay = newTitle.trim() === '' ? `Preview #${id}` : newTitle.trim();
+            
+            titleElement.textContent = titleToDisplay;
+            document.getElementById(`preview-${id}`).title = titleToDisplay;
+
+            // Simpan judul baru (atau default jika kosong)
+            if (!loadedHtmlContents[id]) {
+                loadedHtmlContents[id] = {};
+            }
+            loadedHtmlContents[id].title = titleToDisplay;
+        }
+
+        /**
+         * Menulis konten HTML ke dalam iframe yang ditentukan.
+         * @param {string} htmlContent String konten HTML.
+         * @param {number} id ID pratinjau.
+         */
+        function renderHtmlContent(htmlContent, id) {
+             const iframe = document.getElementById(`preview-${id}`);
+             if (iframe) {
+                 try {
+                     iframe.contentDocument.open();
+                     iframe.contentDocument.write(htmlContent);
+                     iframe.contentDocument.close();
+                 } catch (error) {
+                     console.error('Error rendering HTML content:', error);
+                     iframe.contentDocument.write(`<div style="padding: 20px; color: red; font-family: sans-serif;">Gagal memuat konten. Pastikan file adalah HTML yang valid.</div>`);
+                     iframe.contentDocument.close();
+                 }
+             }
+        }
+        
+        /**
+         * Membaca file yang diunggah dan merendernya ke dalam iframe yang ditentukan.
+         */
+        function handleFileUpload(event, id) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const htmlContent = e.target.result;
+                
+                // Simpan konten dan judul yang sudah ada (jika ada)
+                const currentTitle = loadedHtmlContents[id] ? loadedHtmlContents[id].title : `Preview #${id}`;
+
+                loadedHtmlContents[id] = {
+                    content: htmlContent, 
+                    title: currentTitle 
+                };
+                renderHtmlContent(htmlContent, id);
+            };
+
+            reader.readAsText(file);
+        }
+        
+        /**
+         * MEMPERBARUI SEMUA IFRAME DENGAN KONTEN YANG TELAH DIMUAT.
+         */
+        function refreshAllPreviews() {
+            const count = parseInt(previewCountSelect.value, 10);
+            let refreshedCount = 0;
+            
+            for (let i = 1; i <= count; i++) {
+                if (loadedHtmlContents[i] && loadedHtmlContents[i].content) {
+                    renderHtmlContent(loadedHtmlContents[i].content, i);
+                    refreshedCount++;
+                }
+            }
+            
+            if (refreshedCount > 0) {
+                 console.log(`Berhasil me-refresh ${refreshedCount} pratinjau.`);
+            } else {
+                 console.log(`Tidak ada pratinjau yang dimuat untuk di-refresh.`);
+            }
+        }
+
+        /**
+         * Mengaktifkan mode fullscreen/perbesar untuk semua panel pratinjau.
+         */
+        function toggleFullScreen() {
+            const isFullscreen = previewArea.classList.toggle('is-fullscreen');
+            
+            // Perbarui teks tombol
+            fullscreenText.textContent = isFullscreen ? 'Kecilkan Kembali' : 'Mode Perbesar Semua';
+
+            // Sembunyikan kontrol saat fullscreen
+            document.querySelector('header').classList.toggle('hidden', isFullscreen);
+            document.querySelector('section:first-of-type').classList.toggle('hidden', isFullscreen);
+            document.getElementById('upload-area').classList.toggle('hidden', isFullscreen);
+        }
+
+        /**
+         * Mengaktifkan mode fullscreen/perbesar untuk satu panel pratinjau.
+         */
+        let activeZoomId = null;
+
+        function zoomSinglePreview(id) {
+            const card = document.getElementById(`preview-card-${id}`);
+            const zoomText = document.getElementById(`zoom-text-${id}`);
+            
+            if (activeZoomId && activeZoomId !== id) {
+                zoomSinglePreview(activeZoomId); 
+            }
+
+            const isZoomed = card.classList.toggle('fixed');
+            
+            if (isZoomed) {
+                card.classList.add('inset-0', 'w-full', 'h-full', 'z-40', 'p-4', 'm-0', 'bg-dark-bg', 'flex');
+                card.classList.remove('lg:h-custom-grid'); 
+                
+                for (let i = 1; i <= 4; i++) {
+                    const otherCard = document.getElementById(`preview-card-${i}`);
+                    if (i !== id && otherCard && !otherCard.classList.contains('hidden')) {
+                         otherCard.classList.add('hidden-during-zoom');
+                    }
+                }
+                
+                zoomText.textContent = 'Kecilkan';
+                activeZoomId = id;
+            } else {
+                card.classList.remove('fixed', 'inset-0', 'w-full', 'h-full', 'z-40', 'p-4', 'm-0', 'bg-dark-bg', 'flex');
+                card.classList.add('lg:h-custom-grid'); 
+                
+                for (let i = 1; i <= 4; i++) {
+                    const otherCard = document.getElementById(`preview-card-${i}`);
+                    if (otherCard) {
+                         otherCard.classList.remove('hidden-during-zoom');
+                    }
+                }
+                
+                zoomText.textContent = 'Perbesar';
+                activeZoomId = null;
+            }
+        }
+
+        // Panggil inisialisasi saat halaman dimuat (default 1 panel)
+        document.addEventListener('DOMContentLoaded', initializeUI);
+    </script>
+
+</body>
+</html>
+
