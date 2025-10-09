@@ -13,12 +13,40 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
 .title{font-weight:700;font-size:18px;flex:1}
 .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;color:#fff;background:var(--accent)}
 .btn.add{background:#22c55e}
-.grid{display:grid;grid-template-columns:repeat(2, 1fr);gap:20px;justify-items:center}
-.card{width:100%;background:#111827;border:1px solid #1e293b;border-radius:14px;overflow:hidden;position:relative;transition:.2s}
+.grid{
+  display:flex;
+  flex-wrap:nowrap;
+  gap:20px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding-bottom:10px;
+}
+.card{
+  flex:0 0 calc(50% - 10px);
+  background:#111827;
+  border:1px solid #1e293b;
+  border-radius:14px;
+  overflow:hidden;
+  position:relative;
+  transition:.2s;
+  scroll-snap-align:start;
+}
+@media (max-width:800px){
+  .card{flex:0 0 80%;}
+}
 .card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #1e293b}
 .name{font-weight:600;cursor:pointer}
 .zoom{background:#1e293b;border:none;color:#cbd5e1;padding:5px 9px;border-radius:8px;cursor:pointer}
-.surface{background:#fff;height:300px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;text-align:center}
+.surface{
+  background:#fff;
+  height:245px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  position:relative;
+  text-align:center;
+}
 .surface iframe{width:100%;height:100%;border:0}
 .surface.empty::after{content:"Click to upload HTML file";color:#1e293b;font-weight:700;font-size:15px;text-shadow:0 0 4px #fff;}
 .hold-ring{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:50%;border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
@@ -102,11 +130,6 @@ function render(){
     el.append(head,surface,ring,meta);
     grid.appendChild(el);
   });
-
-  const items=grid.querySelectorAll('.card');
-  if(items.length===3){
-    items[2].style.gridColumn='span 2';
-  }
 }
 
 function removeCard(key){
