@@ -14,11 +14,10 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
 .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;color:#fff;background:var(--accent)}
 .btn.add{background:#22c55e}
 
-/* === LAYOUT: 2 kolom, turun ke bawah === */
 .grid{
   display:grid;
-  grid-template-columns: repeat(2, minmax(0,1fr)); /* 1 2, lalu ke bawah 3 4, dst */
-  gap:20px; /* jarak antar preview */
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:20px;
 }
 
 .card{
@@ -29,18 +28,16 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
 .name{font-weight:600;cursor:pointer}
 .zoom{background:#1e293b;border:none;color:#cbd5e1;padding:5px 9px;border-radius:8px;cursor:pointer}
 
-/* Tinggi preview FIX 245px */
 .surface{
-  background:#fff;height:245px;
+  background:#fff;height:240px;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;position:relative;text-align:center
 }
 .surface iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.surface.empty::after{content:"Click to upload HTML file";color:#1e293b;font-weight:700;font-size:15px;text-shadow:0 0 4px #fff}
+.surface.empty::after{content:"Click to upload HTML file";color:#1e293b;font-weight:700;font-size:15px;text-shadow:0 0 4px #fff;}
 
 .hold-ring{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:50%;border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
 .hold-ring.progress{border-color:var(--ring)}
-.meta{padding:8px 12px;border-top:1px solid #1e293b;color:#94a3b8;font-size:13px;text-align:center}
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:50}
 .overlay.active{display:grid}
@@ -87,6 +84,7 @@ const grid=document.getElementById('grid');
 const overlay=document.getElementById('overlay');
 const filePicker=document.getElementById('filePicker');
 const focus={root:document.getElementById('focus'),name:document.getElementById('focusName'),frame:document.getElementById('focusFrame'),close:document.getElementById('closeFocus')};
+let pending=null;
 
 function render(){
   grid.innerHTML='';
@@ -118,7 +116,13 @@ function render(){
     iframe.srcdoc=card.html||'';
     surface.appendChild(iframe);
 
-    surface.onclick=()=>{ if(!card.html){ pending=card.key; filePicker.value=''; filePicker.click(); } };
+    surface.onclick=()=>{ 
+      if(!card.html){ 
+        pending=card.key; 
+        filePicker.value=''; 
+        filePicker.click(); 
+      }
+    };
 
     const ring=document.createElement('div');
     ring.className='hold-ring';
@@ -127,19 +131,13 @@ function render(){
     ring.onmousedown=()=>{ ring.classList.add('progress'); timer=setTimeout(()=>removeCard(card.key),3500); };
     ring.onmouseup=ring.onmouseleave=()=>{ ring.classList.remove('progress'); clearTimeout(timer); };
 
-    const meta=document.createElement('div');
-    meta.className='meta';
-    meta.textContent=card.html?'File loaded':'No file uploaded';
-
-    el.append(head,surface,ring,meta);
+    el.append(head,surface,ring);
     grid.appendChild(el);
   });
 
-  // Kasus khusus: jika total aktif = 3, buat kartu ke-3 melebar (span 2 kolom)
+  // Jika total preview = 3 → preview ke-3 melebar
   const items=[...grid.querySelectorAll('.card')];
-  if(items.length===3){
-    items[2].style.gridColumn='span 2';
-  }
+  if(items.length===3){ items[2].style.gridColumn='span 2'; }
 }
 
 function removeCard(key){
@@ -161,12 +159,6 @@ focus.close.onclick=()=>{
   document.body.style.overflow='';
 };
 
-document.getElementById('refreshAll').onclick=()=>{
-  overlay.classList.add('active');
-  setTimeout(()=>{ render(); overlay.classList.remove('active'); }, 3000);
-};
-
-let pending=null;
 filePicker.onchange=async (e)=>{
   const f=e.target.files[0];
   if(!f || !pending) return;
@@ -174,6 +166,11 @@ filePicker.onchange=async (e)=>{
   const c=cards.find(x=>x.key===pending);
   if(c){ c.html=t; render(); }
   pending=null;
+};
+
+document.getElementById('refreshAll').onclick=()=>{
+  overlay.classList.add('active');
+  setTimeout(()=>{ render(); overlay.classList.remove('active'); }, 3000);
 };
 
 document.getElementById('addPreview').onclick=()=>{
