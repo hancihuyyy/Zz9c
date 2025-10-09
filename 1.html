@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Preview Playground (Android-friendly)</title>
+<title>Preview Playground (No Filename)</title>
 <style>
 :root{--text:#e5e7eb;--accent:#ef4444;--ring:#22d3ee;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -53,12 +53,8 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
 .focus-stage{flex:1;background:#fff;border-radius:10px;overflow:hidden}
 .focus-stage iframe{width:100%;height:100%;border:0}
 
-/* Biar input file tetap fokusable tapi nggak kelihatan */
 .hidden-file-input{
   position:absolute; left:-9999px; width:1px; height:1px; opacity:0;
-}
-.file-name{
-  position:absolute; left:10px; bottom:10px; font-size:12px; color:#334155; background:#e2e8f0; padding:2px 6px; border-radius:6px;
 }
 </style>
 </head>
@@ -84,7 +80,6 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
     </div>
   </div>
 
-  <!-- Jangan display:none. Biarkan fokusable supaya Android/Chrome mau buka picker -->
   <input
     id="filePicker"
     type="file"
@@ -94,8 +89,7 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
   />
 
 <script>
-/** Versi Android-friendly */
-let cards=[{key:crypto.randomUUID(),name:'Preview #1',html:'',fileName:'',deleted:false}];
+let cards=[{key:crypto.randomUUID(),name:'Preview #1',html:'',deleted:false}];
 const maxCards=10;
 const grid=document.getElementById('grid');
 const overlay=document.getElementById('overlay');
@@ -107,7 +101,7 @@ function render(){
   grid.innerHTML='';
   const active=cards.filter(c=>!c.deleted);
 
-  active.forEach((card, idx)=>{
+  active.forEach((card)=>{
     const el=document.createElement('div');
     el.className='card'; el.dataset.key=card.key;
 
@@ -128,7 +122,6 @@ function render(){
 
     let surface;
     if(!card.html){
-      // Pakai <label for="filePicker"> agar tap memicu picker di Android
       surface=document.createElement('label');
       surface.className='surface empty';
       surface.setAttribute('for','filePicker');
@@ -138,12 +131,10 @@ function render(){
       hint.innerHTML='Ketuk untuk pilih file HTML<br/><small>(Kalau nggak muncul, ubah ke <b>Semua file</b> di picker)</small>';
       surface.appendChild(hint);
 
-      // Saat mau pilih untuk kartu ini, set pendingKey
       surface.addEventListener('click', ()=>{
         pendingKey=card.key;
-        // Beberapa browser support showPicker(); aman kalau dipanggil
         if (typeof filePicker.showPicker === 'function') {
-          try { filePicker.showPicker(); } catch(e) { /* fallback ke default */ }
+          try { filePicker.showPicker(); } catch(e) {}
         }
       }, { passive:true });
 
@@ -154,13 +145,6 @@ function render(){
       iframe.referrerPolicy='no-referrer';
       iframe.srcdoc=card.html;
       surface.appendChild(iframe);
-
-      if(card.fileName){
-        const badge=document.createElement('div');
-        badge.className='file-name';
-        badge.textContent=card.fileName;
-        surface.appendChild(badge);
-      }
     }
 
     const ring=document.createElement('div');
@@ -169,14 +153,13 @@ function render(){
     let timer;
     ring.onmousedown=()=>{ ring.classList.add('progress'); timer=setTimeout(()=>removeCard(card.key),3500); };
     ring.onmouseup=ring.onmouseleave=()=>{ ring.classList.remove('progress'); clearTimeout(timer); };
-    ring.ontouchstart=(e)=>{ ring.classList.add('progress'); timer=setTimeout(()=>removeCard(card.key),3500); };
-    ring.ontouchend=(e)=>{ ring.classList.remove('progress'); clearTimeout(timer); };
+    ring.ontouchstart=()=>{ ring.classList.add('progress'); timer=setTimeout(()=>removeCard(card.key),3500); };
+    ring.ontouchend=()=>{ ring.classList.remove('progress'); clearTimeout(timer); };
 
     el.append(head,surface,ring);
     grid.appendChild(el);
   });
 
-  // Jika total preview = 3 → preview ke-3 melebar
   const items=[...grid.querySelectorAll('.card')];
   if(items.length===3){ items[2].style.gridColumn='span 2'; }
 }
@@ -208,15 +191,12 @@ filePicker.onchange=async (e)=>{
     const c=cards.find(x=>x.key===pendingKey && !x.deleted);
     if(c){
       c.html=text;
-      c.fileName=f.name || '';
       render();
     }
   }catch(err){
-    alert('Gagal membaca file. Coba pilih "Semua file" di picker atau gunakan file .html yang valid.');
+    alert('Gagal membaca file. Pastikan pilih "Semua file" di picker.');
   }finally{
-    // reset
     pendingKey=null;
-    // reset input supaya bisa pilih file yang sama lagi kalau perlu
     filePicker.value='';
   }
 };
@@ -229,7 +209,7 @@ document.getElementById('refreshAll').onclick=()=>{
 document.getElementById('addPreview').onclick=()=>{
   const count=cards.filter(c=>!c.deleted).length;
   if(count>=maxCards){ alert('Maximum 10 previews allowed'); return; }
-  cards.push({key:crypto.randomUUID(),name:'Preview #'+(count+1),html:'',fileName:'',deleted:false});
+  cards.push({key:crypto.randomUUID(),name:'Preview #'+(count+1),html:'',deleted:false});
   render();
 };
 
