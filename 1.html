@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Preview Playground (No Filename)</title>
+<title>Preview Playground (Android, no filename, delete fix)</title>
 <style>
 :root{--text:#e5e7eb;--accent:#ef4444;--ring:#22d3ee;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -24,6 +24,7 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
   background:#111827;border:1px solid #1e293b;border-radius:14px;
   overflow:hidden;position:relative;transition:.2s;
 }
+
 .card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #1e293b}
 .name{font-weight:600;cursor:pointer}
 .zoom{background:#1e293b;border:none;color:#cbd5e1;padding:5px 9px;border-radius:8px;cursor:pointer}
@@ -32,13 +33,19 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
   background:#fff;min-height:240px;
   display:flex;align-items:center;justify-content:center;
   position:relative;text-align:center;cursor:pointer;
+  z-index:0;
 }
 .surface iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .surface.empty{outline:2px dashed #cbd5e1; outline-offset:-8px}
 .surface.empty .hint{color:#1e293b;font-weight:700;font-size:15px;text-shadow:0 0 4px #fff; padding:16px}
 
-.hold-ring{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:50%;border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
-.hold-ring.progress{border-color:var(--ring)}
+.hold-ring{
+  position:absolute;bottom:8px;right:8px;width:38px;height:38px;border-radius:50%;
+  border:2px solid #475569;display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:#94a3b8;background:#0b1220a6;backdrop-filter:blur(3px);
+  z-index:2; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:manipulation;
+}
+.hold-ring:active{transform:scale(0.98)}
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;z-index:50}
 .overlay.active{display:grid}
@@ -53,6 +60,7 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
 .focus-stage{flex:1;background:#fff;border-radius:10px;overflow:hidden}
 .focus-stage iframe{width:100%;height:100%;border:0}
 
+/* Input file jangan display:none supaya mobile ngizinin picker */
 .hidden-file-input{
   position:absolute; left:-9999px; width:1px; height:1px; opacity:0;
 }
@@ -80,6 +88,7 @@ body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,
     </div>
   </div>
 
+  <!-- Input file -->
   <input
     id="filePicker"
     type="file"
@@ -105,6 +114,7 @@ function render(){
     const el=document.createElement('div');
     el.className='card'; el.dataset.key=card.key;
 
+    // header
     const head=document.createElement('div');
     head.className='card-header';
 
@@ -120,12 +130,15 @@ function render(){
 
     head.append(nm,zoom);
 
+    // surface
     let surface;
     if(!card.html){
+      // Pakai <label> supaya tap membuka picker di Android
       surface=document.createElement('label');
       surface.className='surface empty';
       surface.setAttribute('for','filePicker');
       surface.title='Ketuk untuk pilih file .html (ubah ke "Semua file" jika tidak terlihat)';
+
       const hint=document.createElement('div');
       hint.className='hint';
       hint.innerHTML='Ketuk untuk pilih file HTML<br/><small>(Kalau nggak muncul, ubah ke <b>Semua file</b> di picker)</small>';
@@ -147,19 +160,29 @@ function render(){
       surface.appendChild(iframe);
     }
 
+    // tombol hapus (tap + confirm)
     const ring=document.createElement('div');
     ring.className='hold-ring';
     ring.textContent='delete';
-    let timer;
-    ring.onmousedown=()=>{ ring.classList.add('progress'); timer=setTimeout(()=>removeCard(card.key),3500); };
-    ring.onmouseup=ring.onmouseleave=()=>{ ring.classList.remove('progress'); clearTimeout(timer); };
-    ring.ontouchstart=()=>{ ring.classList.add('progress'); timer=setTimeout(()=>removeCard(card.key),3500); };
-    ring.ontouchend=()=>{ ring.classList.remove('progress'); clearTimeout(timer); };
+    ring.setAttribute('role','button');
+    ring.setAttribute('aria-label','Delete preview');
+    ring.tabIndex=0;
+
+    const doDelete=()=>{
+      if(confirm('Hapus preview ini?')){
+        removeCard(card.key);
+      }
+    };
+    ring.addEventListener('click', (e)=>{ e.stopPropagation(); doDelete(); });
+    ring.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' '){ e.preventDefault(); doDelete(); }
+    });
 
     el.append(head,surface,ring);
     grid.appendChild(el);
   });
 
+  // Jika total preview = 3 → preview ke-3 melebar
   const items=[...grid.querySelectorAll('.card')];
   if(items.length===3){ items[2].style.gridColumn='span 2'; }
 }
