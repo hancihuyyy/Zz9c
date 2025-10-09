@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multi-Preview Playground</title>
+<style>
+:root{--bg:#0f172a;--text:#e5e7eb;--accent:#ef4444;--ring:#22d3ee;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0f19;color:var(--text);font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;}
+.app{max-width:1200px;margin:24px auto;padding:0 16px}
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.title{font-weight:700;font-size:18px;flex:1}
+.btn{border:none;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;color:#fff;background:var(--accent)}
+.btn.add{background:#22c55e}
+.grid{display:grid;grid-template-columns:repeat(2, 1fr);gap:20px;justify-items:center}
+.card{width:100%;background:#111827;border:1px solid #1e293b;border-radius:14px;overflow:hidden;position:relative;transition:.2s}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #1e293b}
+.name{font-weight:600;cursor:pointer}
+.zoom{background:#1e293b;border:none;color:#cbd5e1;padding:5px 9px;border-radius:8px;cursor:pointer}
+.surface{background:#fff;height:300px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;text-align:center}
+.surface iframe{width:100%;height:100%;border:0}
+.surface.empty::after{content:"Click to upload HTML file";color:#1e293b;font-weight:700;font-size:15px;text-shadow:0 0 4px #fff;}
+.hold-ring{position:absolute;bottom:8px;right:8px;width:32px;height:32px;border-radius:50%;border:2px solid #475569;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
+.hold-ring.progress{border-color:var(--ring)}
+.meta{padding:8px 12px;border-top:1px solid #1e293b;color:#94a3b8;font-size:13px;text-align:center}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:50}
+.overlay.active{display:flex}
+.spinner{width:60px;height:60px;border-radius:50%;border:5px solid rgba(255,255,255,0.2);border-top-color:white;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.focus{position:fixed;inset:0;background:#0b0f19;display:none;z-index:60;padding:16px}
+.focus.active{display:block}
+.focus-inner{max-width:1100px;margin:auto;height:100%;display:flex;flex-direction:column}
+.focus-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.x{background:#1e293b;border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+.focus-stage{flex:1;background:#fff;border-radius:10px;overflow:hidden}
+.focus-stage iframe{width:100%;height:100%;border:0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="title">Preview Playground</div>
+    <button id="addPreview" class="btn add">＋</button>
+    <button id="refreshAll" class="btn">Refresh All</button>
+  </div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<div id="overlay" class="overlay"><div class="spinner"></div></div>
+
+<div id="focus" class="focus">
+  <div class="focus-inner">
+    <div class="focus-top">
+      <div id="focusName" class="name"></div>
+      <button id="closeFocus" class="x">✕</button>
+    </div>
+    <div class="focus-stage"><iframe id="focusFrame"></iframe></div>
+  </div>
+</div>
+
+<input id="filePicker" type="file" accept="text/html,.html" style="display:none">
+
+<script>
+let cards=[{key:crypto.randomUUID(),name:'Preview #1',html:'',deleted:false}];
+const maxCards=10;
+const grid=document.getElementById('grid');
+const overlay=document.getElementById('overlay');
+const filePicker=document.getElementById('filePicker');
+const focus={root:document.getElementById('focus'),name:document.getElementById('focusName'),frame:document.getElementById('focusFrame'),close:document.getElementById('closeFocus')};
+
+function render(){
+  grid.innerHTML='';
+  const active=cards.filter(c=>!c.deleted);
+  active.forEach((card,i)=>{
+    const el=document.createElement('div');
+    el.className='card';el.dataset.key=card.key;
+
+    const head=document.createElement('div');
+    head.className='card-header';
+    const nm=document.createElement('div');nm.className='name';nm.textContent=card.name;
+    nm.onclick=()=>{const n=prompt('Rename preview:',nm.textContent);if(n){card.name=n;render();}};
+    const zoom=document.createElement('button');zoom.className='zoom';zoom.textContent='Expand';zoom.onclick=()=>enterFocus(card.key);
+    head.append(nm,zoom);
+
+    const surface=document.createElement('div');
+    surface.className='surface'+(card.html?'':' empty');
+    const iframe=document.createElement('iframe');
+    iframe.srcdoc=card.html||'';
+    surface.appendChild(iframe);
+    surface.onclick=()=>{if(!card.html){pending=card.key;filePicker.value='';filePicker.click();}};
+
+    const ring=document.createElement('div');
+    ring.className='hold-ring';ring.textContent='delete';
+    let timer;
+    ring.onmousedown=()=>{ring.classList.add('progress');timer=setTimeout(()=>removeCard(card.key),3500)};
+    ring.onmouseup=ring.onmouseleave=()=>{ring.classList.remove('progress');clearTimeout(timer)};
+
+    const meta=document.createElement('div');
+    meta.className='meta';meta.textContent=card.html?'File loaded':'No file uploaded';
+
+    el.append(head,surface,ring,meta);
+    grid.appendChild(el);
+  });
+
+  const items=grid.querySelectorAll('.card');
+  if(items.length===3){
+    items[2].style.gridColumn='span 2';
+  }
+}
+
+function removeCard(key){
+  const i=cards.findIndex(c=>c.key===key);
+  if(i!==-1){cards[i].deleted=true;render();}
+}
+
+function enterFocus(key){
+  const c=cards.find(x=>x.key===key&&!x.deleted);
+  if(!c)return;
+  focus.name.textContent=c.name;
+  focus.frame.srcdoc=c.html||'';
+  focus.root.classList.add('active');
+  document.body.style.overflow='hidden';
+}
+focus.close.onclick=()=>{
+  focus.root.classList.remove('active');
+  focus.frame.srcdoc='';
+  document.body.style.overflow='';
+};
+
+document.getElementById('refreshAll').onclick=()=>{
+  overlay.classList.add('active');
+  setTimeout(()=>{render();overlay.classList.remove('active');},3000);
+};
+
+let pending=null;
+filePicker.onchange=async e=>{
+  const f=e.target.files[0];
+  if(!f||!pending)return;
+  const t=await f.text();
+  const c=cards.find(x=>x.key===pending);
+  if(c){c.html=t;render();}
+  pending=null;
+};
+
+document.getElementById('addPreview').onclick=()=>{
+  if(cards.filter(c=>!c.deleted).length>=maxCards){alert('Maximum 10 previews allowed');return;}
+  cards.push({key:crypto.randomUUID(),name:'Preview #'+(cards.filter(c=>!c.deleted).length+1),html:'',deleted:false});
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
